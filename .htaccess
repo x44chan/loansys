@@ -1,0 +1,3 @@
+<IfModule mod_rewrite.c> 
+  RewriteRule ^module/(.*)/(.*)$ beehive_deposit.php?id=$1&cus_id=$2
+</IfModule>
