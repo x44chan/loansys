@@ -27,8 +27,8 @@
 			</div>
 			<div class="row" style="margin-left: 20px;" id = "select">
 				<div class="col-xs-6">
-					<label>Select Client</label>
-					<select class="form-control input-sm" name = "customer">
+					<label>Select Client <font color = "red"> * </font></label>
+					<select class="form-control input-sm" name = "customer" required>
 						<option value=""> - - - - - - </option>
 						<?php
 							$customer = "SELECT * FROM customer ORDER BY customer_id";
@@ -72,7 +72,7 @@
 				</div>
 				<div class="col-xs-3">
 					<label>Start Date <font color = "red"> * </font></label>
-					<input type = "date" name = "strtdate" class="form-control input-sm" required onchange="showUser()" autocomplete = "off">
+					<input type = "date" name = "strtdate" class="form-control input-sm" min = "<?php echo date('Y-m-d');?>" max = "<?php echo date('9999-m-d');?>" required onchange="showUser()" autocomplete = "off">
 				</div>
 			</div>
 			<div id = "details">				

@@ -61,6 +61,7 @@
 			<div class = "col-xs-2"><label>Amount</label></div>
 			<div class = "col-xs-2"><label>Penalty</label></div>
 			<div class = "col-xs-2"><label>Due</label></div>
+			<div class = "col-xs-2"><label>Action/Status</label></div>
 		</div>
 		<?php
 			$breakdown = "SELECT * FROM breakdown where loan_id = '$res[loan_id]'";
@@ -71,7 +72,7 @@
 			$counter = 0;
 			if($breakdown->num_rows > 0){
 				while ($row = $breakdown->fetch_assoc()) {
-					$totalamount += str_replace(",", "", number_format($row['amount'],2));
+					$throu = "";
 					$counter += 1;
 					$count = "SELECT count(*) as count FROM breakdown where loan_id = '$res[loan_id]' and deadline <= CURDATE()";
 					$count = $conn->query($count)->fetch_assoc();
@@ -82,21 +83,34 @@
 						$pen = number_format($onepen * $diff->format("%a%"),2);
 						$due = ' style = "color: red; font-weight: bold;" ';
 						$diff = '( ' . $diff->format("%a%") . ' day/s )';
+						$pay = 1;
 					}else{
+						$pay = 0;
 						$pen = 0;
 						$diff = "";
 						$due = "";
 						$penalty = ' - ';
 					}
-					$totalpen += str_replace(",", "", number_format($pen,2));
-					$totaldue += str_replace(",", "", number_format($pen + $row['amount'],2));
+					if($row['state'] != 0){
+						$throu = ' style = "text-decoration: line-through; " ';
+						$due = " style = 'color: green; font-weight: bold;'";
+					}else{						
+						$totalpen += str_replace(",", "", number_format($pen,2));
+						$totaldue += str_replace(",", "", number_format($pen + $row['amount'],2));
+						$totalamount += str_replace(",", "", number_format($row['amount'],2));
+					}
 					echo '<div class = "row"' . $due .'>';
 					echo	'<div class = "col-xs-3 col-xs-offset-1"><i><p>' . date("M j, Y", strtotime($row['deadline'])) . ' ' . $diff . '</p></i></div>';
-					echo	'<div class = "col-xs-2"><i><p>₱ ' . number_format($row['amount'],2) . '</p></i></div>';
-					echo	'<div class = "col-xs-2"><i><p>' . $penalty . '</p></i></div>';
-					echo	'<div class = "col-xs-2"><i><p>₱ ' . number_format($pen + $row['amount'],2) . '</p></i></div>';
+					echo	'<div class = "col-xs-2"><i><p '.$throu.'>₱ ' . number_format($row['amount'],2) . '</p></i></div>';
+					echo	'<div class = "col-xs-2"><i><p '.$throu.'>' . $penalty . '</p></i></div>';
+					echo	'<div class = "col-xs-2"><i><p '.$throu.'>₱ ' . number_format($pen + $row['amount'],2) . '</p></i></div>';
+					if($pay == 1 && $row['state'] == 0){
+						echo 	'<div class = "col-xs-2"><i><p><a onclick = "setTimeout(\'window.location.href=window.location.href\', 0);" target = "_blank" href = "?module=loan&action=payment&id=' . $_GET['id'] . '&paid='.$row['breakdown_id'].'" class = "btn btn-primary btn-sm"  onclick = "return confirm(\'Are you sure?\');"> Paid </a></div>';
+					}else{
+						echo 	'<div class = "col-xs-2"><i><p>Paid</p></i></div>';	
+					}
 					echo '</div>';
-					if($counter == $count['count']){
+					if($counter == $count['count'] && $row['state'] == 0){
 						echo '<div class = "row">';
 						echo	'<div class = "col-xs-12"><hr></div>';
 						echo '</div>';
@@ -105,6 +119,7 @@
 						echo	'<div class = "col-xs-2">₱ ' . number_format($totalamount,2) . '</div>';
 						echo	'<div class = "col-xs-2">₱ ' . number_format($totalpen,2) . '</div>';
 						echo	'<div class = "col-xs-2">₱ ' . number_format($totaldue,2) . '</div>';
+						echo 	'<div class = "col-xs-2"><i><p><a onclick = "setTimeout(\'window.location.href=window.location.href\', 0);" target = "_blank" href = "?module=loan&action=payment&id=' . $_GET['id'] . '&paid=all" class = "btn btn-success btn-sm"  onclick = "return confirm(\'Are you sure?\');"> Paid All </a></div>';
 						echo '</div>';
 						echo '<div class = "row">';
 						echo	'<div class = "col-xs-12"><hr></div>';
