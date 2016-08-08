@@ -11,18 +11,30 @@
 					<h5><b><u><i><span class="icon-user"></span> Client Information</i></u></b></h5>
 				</div>
 			</div>
-			<div class="row" style="margin-left: 20px; display: none;" id = "new">
-				<div class="col-xs-4">
-					<label>First Name <font color = "red"> * </font></label>
-					<input type = "text" name = "fname" class="form-control input-sm" placeholder = "Enter First Name" autocomplete = "off">
+			<div  id = "new" style="display: none;">
+				<div class="row" style="margin-left: 20px;">
+					<div class="col-xs-4">
+						<label>First Name <font color = "red"> * </font></label>
+						<input type = "text" name = "fname" class="form-control input-sm" placeholder = "Enter First Name" autocomplete = "off">
+					</div>
+					<div class="col-xs-4">
+						<label>Middle Name <font color = "red"> * </font></label>
+						<input type = "text" name = "mname" class="form-control input-sm" placeholder = "Enter First Name" autocomplete = "off">
+					</div>
+					<div class="col-xs-4">
+						<label>Last Name <font color = "red"> * </font></label>
+						<input type = "text" name = "lname" class="form-control input-sm" placeholder = "Enter First Name" autocomplete = "off">
+					</div>
 				</div>
-				<div class="col-xs-4">
-					<label>Middle Name <font color = "red"> * </font></label>
-					<input type = "text" name = "mname" class="form-control input-sm" placeholder = "Enter First Name" autocomplete = "off">
-				</div>
-				<div class="col-xs-4">
-					<label>Last Name <font color = "red"> * </font></label>
-					<input type = "text" name = "lname" class="form-control input-sm" placeholder = "Enter First Name" autocomplete = "off">
+				<div class="row" style="margin-left: 20px;">
+					<div class="col-xs-6">
+						<label>Address <font color = "red"> * </font></label>
+						<textarea name = "address" class="form-control input-sm" placeholder = "Enter Address" autocomplete = "off"></textarea>
+					</div>
+					<div class="col-xs-4">
+						<label>Contact No. <font color = "red"> * </font></label>
+						<input type = "text" name = "contact" class="form-control input-sm" placeholder = "09XXXXXXX" maxlength="11">
+					</div>
 				</div>
 			</div>
 			<div class="row" style="margin-left: 20px;" id = "select">
@@ -55,10 +67,10 @@
 			</div>
 			<div class="row" style="margin-left: 20px;">
 				<div class="col-xs-3">
-					<label>Loan Amount <font color = "red"> * </font></label>
+					<label>Loan/Principal Amount <font color = "red"> * </font></label>
 					<input type = "text" name = "amount" class="form-control input-sm" placeholder = "Enter Loan Amount" required pattern = "[.0-9]*" autocomplete = "off" onchange="showUser()">
 				</div>
-				<div class="col-xs-3">
+				<div class="col-xs-2">
 					<label>Type <font color = "red"> * </font></label>
 					<select class="form-control input-sm" name = "type" onchange="showUser()">
 						<option value="Daily"> Daily </option>
@@ -66,13 +78,18 @@
 						<option value="Monthly"> Monthly </option>						
 					</select>
 				</div>
-				<div class="col-xs-3">
+				<div class="col-xs-2">
 					<label>Duration (in numbers)<font color = "red"> * </font></label>
 					<input type = "text" name = "duration" class="form-control input-sm" placeholder = "Enter duration" required pattern = "[0-9]*" onchange="showUser()" autocomplete = "off">
 				</div>
 				<div class="col-xs-3">
 					<label>Start Date <font color = "red"> * </font></label>
 					<input type = "date" name = "strtdate" class="form-control input-sm" min = "<?php echo date('Y-m-d');?>" max = "<?php echo date('9999-m-d');?>" required onchange="showUser()" autocomplete = "off">
+				</div>
+				<div class="col-xs-2">
+					<label>Special Rate <font color = "red" id = "asterisk" style="display: none;"> * </font></label>
+					<input type = "text" name = "specialrate" class="form-control input-sm" placeholder = "Enter Rate" disabled onchange="showUser()">
+					<label><input type = "checkbox" id = "specialrate"> Enable </label>
 				</div>
 			</div>
 			<div id = "details">				
@@ -89,18 +106,23 @@
 <?php
 	if(isset($_POST['loansub'])){
 		if(!isset($_POST['customer'])){
-			$cust = $conn->prepare("INSERT INTO customer (fname,mname,lname) VALUES (?, ?, ?)");
-			$cust->bind_param("sss", $_POST['fname'], $_POST['mname'], $_POST['lname']);
+			$cust = $conn->prepare("INSERT INTO customer (fname,mname,lname,address,contact) VALUES (?, ?, ?, ?, ?)");
+			$cust->bind_param("ssssi", $_POST['fname'], $_POST['mname'], $_POST['lname'], $_POST['address'], $_POST['contact']);
 			if($cust->execute() == TRUE){	
 				$cust_id = 	$conn->insert_id;
 			}
+			savelogs("Add new customer", 'Name ->' . $_POST['fname'] . ' ' . $_POST['mname'] . ' ' . $_POST['lname'] . ', Address -> ' . $_POST['address'] . ', Contact # -> ' . $_POST['contact']);
 		}else{
 			$cust_id = mysqli_real_escape_string($conn, $_POST['customer']);
-		}	
+		}
 		$gerate = "SELECT ".strtolower($_POST['type']) ." as rate FROM rate";
 		$gerate = $conn->query($gerate)->fetch_assoc();
-		$loan = $conn->prepare("INSERT INTO loan (customer_id, amount, duration, type, startdate) VALUES (?, ?, ?, ?, ?)");
-		$loan->bind_param("issss", $cust_id, $_POST['amount'], $_POST['duration'], $_POST['type'], $_POST['strtdate']);
+		if(isset($_POST['specialrate']) && !empty($_POST['specialrate'])){
+			$sprate = 1;
+			$gerate['rate'] = $_POST['specialrate'];
+		}
+		$loan = $conn->prepare("INSERT INTO loan (customer_id, amount, duration, type, startdate, rate, specialrate) VALUES (?, ?, ?, ?, ?, ?, ?)");
+		$loan->bind_param("isssssi", $cust_id, $_POST['amount'], $_POST['duration'], $_POST['type'], $_POST['strtdate'], $gerate['rate'], $sprate);
 		if($loan->execute() == TRUE){
 			$loan_id = $conn->insert_id;
 			if($_POST['type'] == 'Daily'){
@@ -111,18 +133,24 @@
 				$_POST['type'] = 'Month';
 			}
 			$total = 0;
+			$totalinte = 0;
 			for($i = 0; $i < $_POST['duration']; $i++){	
-				$brkamnt = number_format((($_POST['amount'] * $gerate['rate']) + $_POST['amount'])/$_POST['duration'],2);
+				$brkamnt = number_format($_POST['amount']/$_POST['duration'],2);
 				$brkamnt = str_replace(",", "", $brkamnt);
+				$inte = number_format(($_POST['amount'] * $gerate['rate'])/$_POST['duration'],2);
+				$inte = str_replace(",", "", $inte);
 				$total += $brkamnt;
+				$totalinte += $inte;
 				if($i == ($_POST['duration'] - 1)){
-					$brkamnt += (($_POST['amount'] * $gerate['rate']) + $_POST['amount']) - $total;
+					$brkamnt += number_format($_POST['amount'] - $total,2);
+					$inte += number_format(($_POST['amount'] * $gerate['rate']) - $totalinte,2);
 				}
-				$breakdown = $conn->prepare("INSERT INTO breakdown (loan_id, deadline, amount) VALUES (?, ?, ?)");
+				$breakdown = $conn->prepare("INSERT INTO breakdown (loan_id, deadline, amount, interest) VALUES (?, ?, ?, ?)");
 				$deadline = date("Y-m-d", strtotime("+".$i.' '. $_POST['type'], strtotime(mysqli_real_escape_string($conn, $_POST['strtdate']))));
-				$breakdown->bind_param("iss", $loan_id, $deadline, $brkamnt);
+				$breakdown->bind_param("isss", $loan_id, $deadline, $brkamnt, $inte);
 				$breakdown->execute();
 			}
+			savelogs("Add new loan", 'LoanID -> ' . $loan_id . ", Principal Amount -> " . $_POST['amount'] . ', Interest -> ' . number_format(($_POST['amount'] * $gerate['rate'])/$_POST['duration'],2) . ', Rate -> ' . $gerate['rate'] . ' Start Date -> ' . $_POST['strtdate'] . ', CustomerID -> ' . $cust_id);
 			echo '<script type = "text/javascript">alert("Adding Record Successful");window.location.replace("/loan/?module=loan&action=list");</script>';
 		}
 	}

@@ -4,6 +4,7 @@
 		amount = $("input[name = 'amount']").val();
 		duration = $("input[name = 'duration']").val();
 		strtdate = $("input[name = 'strtdate']").val();
+		sprate = $("input[name = 'specialrate']").val();
 		if (type == "") {
 		    document.getElementById("details").innerHTML = "";
 		    return;
@@ -20,7 +21,7 @@
 		            document.getElementById("details").innerHTML = xmlhttp.responseText;
 		        }
 		    };
-		    xmlhttp.open("GET","ajax/ajaxowner.php?amount="+amount+"&type="+type+"&duration="+duration+"&strtdate="+strtdate,true);
+		    xmlhttp.open("GET","ajax/ajaxowner.php?amount="+amount+"&type="+type+"&duration="+duration+"&strtdate="+strtdate+"&sprate="+sprate,true);
 		    xmlhttp.send();
 		}
 	}

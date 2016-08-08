@@ -1,16 +1,4 @@
 $(document).ready( function () {
-  $('#myTable').DataTable( {
-    "bFilter": false,
-    "bLengthChange": false,
-    "iDisplayLength": 15
-  });
-  $('#myTable2').DataTable( {
-    "bFilter": false,
-    "bLengthChange": false,
-    "iDisplayLength": 15,
-    "sorting": false
-  });
-  //$(".jumbotron").hide().fadeIn();
   $('[data-toggle="tooltip"]').tooltip(); 
   $('input:checkbox').change(function(){
         if($('#checkbox').is(":checked")){          
@@ -21,6 +9,8 @@ $(document).ready( function () {
           $("input[name = 'fname']").attr('required',true);
           $("input[name = 'mname']").attr('required',true);
           $("input[name = 'lname']").attr('required',true);
+          $("textarea[name = 'address']").attr('required',true);
+          $("input[name = 'contact']").attr('required',true);
         }else{
           $("#select").show();
           $("#new").hide();
@@ -29,6 +19,17 @@ $(document).ready( function () {
           $("input[name = 'fname']").attr('required',false);
           $("input[name = 'mname']").attr('required',false);
           $("input[name = 'lname']").attr('required',false);
+          $("textarea[name = 'address']").attr('required',false);
+          $("input[name = 'contact']").attr('required',false);
+        }
+        if($('#specialrate').is(":checked")){          
+          $("#asterisk").show();
+          $("input[name = 'specialrate']").attr('required',true);
+          $("input[name = 'specialrate']").attr('disabled',false);
+        }else{
+          $("#asterisk").hide();
+          $("input[name = 'specialrate']").attr('required',false);
+          $("input[name = 'specialrate']").attr('disabled',true);
         }
   });
 });
