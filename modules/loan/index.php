@@ -13,33 +13,33 @@
 			</div>
 			<div  id = "new" style="display: none;">
 				<div class="row" style="margin-left: 20px;">
-					<div class="col-xs-4">
-						<label>First Name <font color = "red"> * </font></label>
+					<div class="col-md-4 col-xs-12">
+						<label>First Name<font color = "red"> * </font></label>
 						<input type = "text" name = "fname" class="form-control input-sm" placeholder = "Enter First Name" autocomplete = "off">
 					</div>
-					<div class="col-xs-4">
+					<div class="col-md-4 col-xs-12">
 						<label>Middle Name <font color = "red"> * </font></label>
 						<input type = "text" name = "mname" class="form-control input-sm" placeholder = "Enter First Name" autocomplete = "off">
 					</div>
-					<div class="col-xs-4">
-						<label>Last Name <font color = "red"> * </font></label>
+					<div class="col-md-4 col-xs-12">
+						<label>Last Name<font color = "red"> * </font></label>
 						<input type = "text" name = "lname" class="form-control input-sm" placeholder = "Enter First Name" autocomplete = "off">
 					</div>
 				</div>
 				<div class="row" style="margin-left: 20px;">
-					<div class="col-xs-6">
+					<div class="col-md-6 col-xs-12">
 						<label>Address <font color = "red"> * </font></label>
 						<textarea name = "address" class="form-control input-sm" placeholder = "Enter Address" autocomplete = "off"></textarea>
 					</div>
-					<div class="col-xs-4">
+					<div class="col-md-4 col-xs-12">
 						<label>Contact No. <font color = "red"> * </font></label>
 						<input type = "text" name = "contact" class="form-control input-sm" placeholder = "09XXXXXXX" maxlength="11">
 					</div>
 				</div>
 			</div>
 			<div class="row" style="margin-left: 20px;" id = "select">
-				<div class="col-xs-6">
-					<label>Select Client <font color = "red"> * </font></label>
+				<div class="col-md-6 col-xs-12">
+					<label>Select Client<font color = "red"> * </font></label>
 					<select class="form-control input-sm" name = "customer" required>
 						<option value=""> - - - - - - </option>
 						<?php
@@ -55,7 +55,7 @@
 				</div>
 			</div>
 			<div class="row" style="margin-left: 20px;">
-				<div class="col-xs-6">
+				<div class="col-md-6 col-xs-12">
 					<label><input type = "checkbox" name = "checkbox" id = "checkbox"/> Add new client </label>
 				</div>
 			</div>
@@ -66,11 +66,11 @@
 				</div>
 			</div>
 			<div class="row" style="margin-left: 20px;">
-				<div class="col-xs-3">
-					<label>Loan/Principal Amount <font color = "red"> * </font></label>
+				<div class="col-md-3 col-xs-12">
+					<label>Loan/Principal Amount<font color = "red"> *</font></label>
 					<input type = "text" name = "amount" class="form-control input-sm" placeholder = "Enter Loan Amount" required pattern = "[.0-9]*" autocomplete = "off" onchange="showUser()">
 				</div>
-				<div class="col-xs-2">
+				<div class="col-md-2 col-xs-12">
 					<label>Type <font color = "red"> * </font></label>
 					<select class="form-control input-sm" name = "type" onchange="showUser()">
 						<option value="Daily"> Daily </option>
@@ -78,15 +78,15 @@
 						<option value="Monthly"> Monthly </option>						
 					</select>
 				</div>
-				<div class="col-xs-2">
+				<div class="col-md-2 col-xs-12">
 					<label>Duration (in numbers)<font color = "red"> * </font></label>
 					<input type = "text" name = "duration" class="form-control input-sm" placeholder = "Enter duration" required pattern = "[0-9]*" onchange="showUser()" autocomplete = "off">
 				</div>
-				<div class="col-xs-3">
+				<div class="col-md-3 col-xs-12">
 					<label>Start Date <font color = "red"> * </font></label>
 					<input type = "date" name = "strtdate" class="form-control input-sm" min = "<?php echo date('Y-m-d');?>" max = "<?php echo date('9999-m-d');?>" required onchange="showUser()" autocomplete = "off">
 				</div>
-				<div class="col-xs-2">
+				<div class="col-md-2 col-xs-12">
 					<label>Special Rate <font color = "red" id = "asterisk" style="display: none;"> * </font></label>
 					<input type = "text" name = "specialrate" class="form-control input-sm" placeholder = "Enter Rate" disabled onchange="showUser()">
 					<label><input type = "checkbox" id = "specialrate"> Enable </label>

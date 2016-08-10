@@ -4,7 +4,6 @@ table .header-fixed {
   /*left: 0;*/
   /*right: 0;*/
   z-index: 1020; /* 10 less than .navbar-fixed to prevent any overlap */
-
 }
 #thead{
   background-color: #eaeaea;
@@ -40,22 +39,27 @@ hr{
 .row{
   margin-bottom: 5px;
 }
-
 #tble th, #tble tr, #tble td{
   text-align: center !important;
   padding: 8px;
 }
-
 #tble td, #tble th {
   border: 0px !important;
 }
-
 html #tble .table{
   overflow: auto;
 }
 #table td{
   border-top: none !important; 
 }
+.dropdown:hover .dropdown-menu {
+    display: block;
+}
+.navbar-default .navbar-nav>li:hover {
+    color: #555;
+    background-color: #e7e7e7;
+}
+
 /* Sticky footer styles
 -------------------------------------------------- */
 html {
@@ -63,7 +67,6 @@ html {
   min-height: 100%;
   overflow-x: hidden;
 }
-
 .footer {
   position: absolute;
   bottom: 0;
@@ -73,14 +76,17 @@ html {
   background-color: #f5f5f5;
 }
 
-
 /* Custom page CSS
 -------------------------------------------------- */
 .container .text-muted {
   margin: 20px 0;
 }
-#bdless {border-bottom:0px !important;}
-#bdless th, #bdless td {border: 0px !important;}
+#bdless {
+  border-bottom:0px !important;
+}
+#bdless th, #bdless td {
+  border: 0px !important;
+}
 .modal-header h4, .modal-header, .close {
   background-color: #5cb85c;
   color:white !important;
@@ -90,9 +96,49 @@ html {
 .modal-footer {
   background-color: #f9f9f9;
 }
+#loader {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: 150px;
+  height: 150px;
+  margin: -75px 0 0 -75px;
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #555;
+  width: 120px;
+  height: 120px;
+  -webkit-animation: spin 1.3s linear infinite;
+  animation: spin 1.3s linear infinite;
+}
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Add animation to "page content" */
+.animate-bottom {
+  position: relative;
+  -webkit-animation-name: animatebottom;
+  -webkit-animation-duration: .6s;
+  animation-name: animatebottom;
+  animation-duration: .6s
+}
+@-webkit-keyframes animatebottom {
+  from { bottom:-100px; opacity:0 }
+  to { bottom:0px; opacity:1 }
+}
+@keyframes animatebottom {
+  from{ bottom:-100px; opacity:0 }
+  to{ bottom:0; opacity:1 }
+}
 
 /* Fonts */
-
 /* latin */
 @font-face {
   font-family: 'Montserrat';
@@ -109,7 +155,6 @@ html {
   src: local('Montserrat-Bold'), url(http://fonts.gstatic.com/s/montserrat/v6/IQHow_FEYlDC4Gzy_m8fcoWiMMZ7xLd792ULpGE4W_Y.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
 }
-
 /* cyrillic-ext */
 @font-face {
   font-family: 'Open Sans';

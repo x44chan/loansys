@@ -52,8 +52,33 @@
       </div>      
     </div>
   </div>
+  <div class="modal fade" id="changepass" role="dialog">
+    <div class="modal-dialog">    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header" style="padding:35px 50px;">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4>Update Password</h4>
+        </div>
+        <div class="modal-body" style="padding:40px 50px;">
+          <form role="form" action = "" method = "post">
+            <div class="form-group">
+              <label for="usrname"><span class="glyphicon glyphicon-eye-open"></span> Password</label>
+              <input type="password" class="form-control" required id="psw" name = "pword" autocomplete="off"placeholder="Enter password">
+            </div>
+            <div class="form-group">
+              <label for="psw"><span class="glyphicon glyphicon-eye-open"></span> Confirm Password</label>
+              <input type="password" class="form-control" required id="psw1" name = "pword2" autocomplete="off"placeholder="Enter password">
+            </div>
+              <button type="submit" id = "submitss" name = "submitpw" class="btn btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Update</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+    <div id="loader"></div>
     <!-- Page Content -->
-    <div class = "container-fluid" id = "tohide" style="margin-top: 60px; visibility: hidden;">
+    <div class = "container-fluid animate-bottom" id = "tohide" style="margin-top: 60px; display: none;">
       <?php
       	/*if(!isset($_GET['module'])){
           include 'modules/main.php';
@@ -138,6 +163,6 @@ include('config/footer.php');
     $("#b-0").click(function() { NProgress.start(); });
     $("#b-40").click(function() { NProgress.set(0.4); });
     $("#b-inc").click(function() { NProgress.inc(); });
-    setTimeout(function() { NProgress.done(); $("#tohide").css('visibility','visible').hide().fadeIn('slow'); }, 1000);
+    setTimeout(function() { NProgress.done(); document.getElementById("loader").style.display = "none"; $("#tohide").css('display','block'); }, 1300);
     $("#b-100").click(function() { NProgress.done(); });	
 </script>

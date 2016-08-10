@@ -16,14 +16,15 @@
         		<li class="dropdown">
 	            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="icon-coin-dollar"></span> Loan <b class="caret"></b></a>
 	            <ul class="dropdown-menu" role="menu">
-	             <li><a role = "button" href = "?module=loan"><span class="icon-plus"></span> New Loan Application </a></li>
-               <li><a role = "button" href = "?module=loan&action=list"><span class="icon-list"></span> Loan List </a></li>
+	               <li><a role = "button" href = "?module=loan"><span class="icon-plus"></span> New Loan Application </a></li>
+                   <li><a role = "button" href = "?module=loan&action=list"><span class="icon-list"></span> Loan List </a></li>
 	            </ul>
 	          </li>
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <span class="icon-cogs"></span> System Management <b class="caret"></b></a>
                 <ul class="dropdown-menu" role="menu">
-                  <li><a href="#"  data-toggle="modal" data-target="#interest"> <span class = "icon-calculator"></span> Interest Rate</a></li>
+                    <li><a href="#"  data-toggle="modal" data-target="#interest"> <span class = "icon-calculator"></span> Interest Rate</a></li>
+                    <li><a role = "button" href = "?module=audit"><span class="icon-clipboard"></span> Audit Log </a></li>
                 </ul>
             </li> 
           </ul>
@@ -31,7 +32,7 @@
         		<li class="dropdown">
             		<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="icon-user"></span> <?php echo $_SESSION['name']; ?> <b class="caret"></b></a>
             		<ul class="dropdown-menu" role="menu">            			
-						<li><a role = "button" href = "?module=changepass"><span class="icon-eye"></span> Change Password </a></li>
+						<li><a role = "button" data-toggle="modal" data-target="#changepass"><span class="icon-eye"></span> Change Password </a></li>
                 		<li><a style = "color: red;" role = "button" href = "?module=logout"><span class="icon-switch"></span> Log Out </a></li>					
             		</ul>
             	</li> 

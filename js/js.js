@@ -1,36 +1,45 @@
 $(document).ready( function () {
   $('[data-toggle="tooltip"]').tooltip(); 
   $('input:checkbox').change(function(){
-        if($('#checkbox').is(":checked")){          
-          $("#new").show();
-          $("#select").hide();
-          $("select[name = 'customer']").attr('required',false);
-          $("select[name = 'customer']").attr('disabled',true);
-          $("input[name = 'fname']").attr('required',true);
-          $("input[name = 'mname']").attr('required',true);
-          $("input[name = 'lname']").attr('required',true);
-          $("textarea[name = 'address']").attr('required',true);
-          $("input[name = 'contact']").attr('required',true);
-        }else{
-          $("#select").show();
-          $("#new").hide();
-          $("select[name = 'customer']").attr('required',true);
-          $("select[name = 'customer']").attr('disabled',false);
-          $("input[name = 'fname']").attr('required',false);
-          $("input[name = 'mname']").attr('required',false);
-          $("input[name = 'lname']").attr('required',false);
-          $("textarea[name = 'address']").attr('required',false);
-          $("input[name = 'contact']").attr('required',false);
-        }
-        if($('#specialrate').is(":checked")){          
-          $("#asterisk").show();
-          $("input[name = 'specialrate']").attr('required',true);
-          $("input[name = 'specialrate']").attr('disabled',false);
-        }else{
-          $("#asterisk").hide();
-          $("input[name = 'specialrate']").attr('required',false);
-          $("input[name = 'specialrate']").attr('disabled',true);
-        }
+    if($('#checkbox').is(":checked")){          
+      $("#new").show();
+      $("#select").hide();
+      $("select[name = 'customer']").attr('required',false);
+      $("select[name = 'customer']").attr('disabled',true);
+      $("input[name = 'fname']").attr('required',true);
+      $("input[name = 'mname']").attr('required',true);
+      $("input[name = 'lname']").attr('required',true);
+      $("textarea[name = 'address']").attr('required',true);
+      $("input[name = 'contact']").attr('required',true);
+    }else{
+      $("#select").show();
+      $("#new").hide();
+      $("select[name = 'customer']").attr('required',true);
+      $("select[name = 'customer']").attr('disabled',false);
+      $("input[name = 'fname']").attr('required',false);
+      $("input[name = 'mname']").attr('required',false);
+      $("input[name = 'lname']").attr('required',false);
+      $("textarea[name = 'address']").attr('required',false);
+      $("input[name = 'contact']").attr('required',false);
+    }
+    if($('#specialrate').is(":checked")){          
+      $("#asterisk").show();
+      $("input[name = 'specialrate']").attr('required',true);
+      $("input[name = 'specialrate']").attr('disabled',false);
+    }else{
+      $("#asterisk").hide();
+      $("input[name = 'specialrate']").attr('required',false);
+      $("input[name = 'specialrate']").attr('disabled',true);
+    }
+  });
+  $("#submitss").click(function(){
+    if($("#psw").val() != $("#psw1").val()){
+      alert("Password does not match");
+      return false;
+    }
+  });
+  $('.dropdown-toggle').click(function(){ 
+    return false
   });
 });
 
@@ -42,6 +51,7 @@ $(window).load(function(){
 $(document).ready(function(){
   $('.table-fixed-header').fixedHeader();
 });
+
 (function ($) {
 
   $.fn.fixedHeader = function (options) {
