@@ -138,6 +138,81 @@ html {
   to{ bottom:0; opacity:1 }
 }
 
+@media screen {
+    header.onlyprint, footer.onlyprint{
+        display: none; /* Hide from screen */
+    }
+}
+
+@media print {
+    header.onlyprint {
+        position: fixed; /* Display only on print page (each) */
+        top: 0; /* Because it's header */
+        font-size: 8px;
+        right: 0;
+        text-transform: italic;
+    }
+    footer.onlyprint {
+        position: fixed;
+        bottom: 0; /* Because it's footer */
+        font-size: 8px;
+        right: 0;
+        text-transform: italic;
+    }
+}
+/* Print */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  @page{ size: A4;}
+  #reportg h4{
+    font-size: 15px;
+  }
+  @page{
+    margin-left: 5mm;
+    margin-right: 2mm;
+  }
+  #reportg, #reportg * {
+    visibility: visible;
+  }
+  label{
+    font-size: 10px;
+  } 
+  p{
+    font-size: 10px !important;
+  }
+  #details{
+    font-size: 8px;
+  }
+  #reportg th{
+    font-size: 10px;
+    width: 0;
+  } 
+  #reportg td{
+    font-size: 9px;
+    bottom: 0px;
+    padding: 3px  ₱ 1,000.00;
+    max-width: 210px;
+  }
+  #reportg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+  }
+  #backs{
+    display: none;
+  }
+}
+
+#redx td{
+  color: red !important;
+  font-weight: bold;
+}
+
+
+
 /* Fonts */
 /* latin */
 @font-face {

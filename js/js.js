@@ -26,10 +26,17 @@ $(document).ready( function () {
       $("#asterisk").show();
       $("input[name = 'specialrate']").attr('required',true);
       $("input[name = 'specialrate']").attr('disabled',false);
+      if($("input[name = 'amount']").val() != "" || $("input[name = 'duration']").val() != ""){
+        showUser();
+      }
     }else{
       $("#asterisk").hide();
       $("input[name = 'specialrate']").attr('required',false);
       $("input[name = 'specialrate']").attr('disabled',true);
+      $("input[name = 'specialrate']").val("");
+      if($("input[name = 'amount']").val() != "" || $("input[name = 'duration']").val() != ""){
+        showUser();
+      }
     }
   });
   $("#submitss").click(function(){
@@ -50,6 +57,12 @@ $(window).load(function(){
 //sticky thead
 $(document).ready(function(){
   $('.table-fixed-header').fixedHeader();
+  NProgress.start();
+  $("#b-0").click(function() { NProgress.start(); });
+  $("#b-40").click(function() { NProgress.set(0.4); });
+  $("#b-inc").click(function() { NProgress.inc(); });
+  setTimeout(function() { NProgress.done(); $("#loader").css('display','none'); $("#tohide").css('display','block'); }, 1300);
+  $("#b-100").click(function() { NProgress.done(); });
 });
 
 (function ($) {

@@ -1,4 +1,4 @@
-<div class="container-fluid" style="font-size: 13.5px; margin: 15px;">
+<div class="container-fluid" style="font-size: 13.5px; margin: 0 20px 0 20px;">
 	<div class="row">
 		<div class="col-xs-12" align="center">
 			<h4> Aduit Trail </h4>
@@ -73,6 +73,7 @@
 	?>
 	<div class="row">
 		<div class="col-xs-12" align="center">
+			<hr>
 			<!--<label>Records <?php $startArticlex = $startArticle + 1; $perpagex = $perpage * $_GET['page']; if($perpagex > $counter2['total']){ $perpagex = $counter2['total'];} echo $startArticlex . ' - ' . $perpagex ?> </label><br>-->
 			<label> Pages </label><br>
 			<?php

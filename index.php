@@ -13,11 +13,11 @@
 ?>
 <?php
   if(isset($_POST['submitrate'])){
-    $rate = $conn->prepare("UPDATE rate set daily = ?,weekly = ?,monthly = ?");
-    $rate->bind_param("sss", $_POST['dailyrate'], $_POST['weeklyrate'], $_POST['monthlyrate']);
+    $rate = $conn->prepare("UPDATE rate set daily = ?,weekly = ?,monthly = ?, penalty = ?");
+    $rate->bind_param("ssss", $_POST['dailyrate'], $_POST['weeklyrate'], $_POST['monthlyrate'], $_POST['penalty']);
     if($rate->execute()){
       echo '<script type = "text/javascript">alert("Rates Updated");window.location.replace("/loan/?module='.$_GET['module'].'");</script>';
-      savelogs('Change Rate', 'Daily ->' . $_POST['dailyrate'] . ', Weekly -> ' . $_POST['weeklyrate'] . ', Monthly -> ' . $_POST['monthlyrate']);
+      savelogs('Change Rate', 'Daily -> ' . $_POST['dailyrate'] . ', Weekly -> ' . $_POST['weeklyrate'] . ', Monthly -> ' . $_POST['monthlyrate'] . ', Penalty -> ' . $_POST['penalty']);
     }
   }
   $gerate = "SELECT * FROM rate";
@@ -45,6 +45,10 @@
             <div class="form-group">
               <label for="usrname"> Monthly Interest Rate (in decimal) </label>
               <input type = "text" <?php echo ' value = "' . $gerate['monthly'] . '" ';?> class="form-control input-sm" placeholder = "Enter Monthly Interest Rate" name = "monthlyrate" pattern = "[.0-9]*" required>
+            </div>
+            <div class="form-group">
+              <label for="usrname"> Penalty per day (in decimal) </label>
+              <input type = "text" <?php echo ' value = "' . $gerate['penalty'] . '" ';?> class="form-control input-sm" placeholder = "Enter Monthly Interest Rate" name = "penalty" pattern = "[.0-9]*" required>
             </div>
             <button type="submit" name = "submitrate" class="btn btn-success btn-block">Update</button>
           </form>
@@ -78,7 +82,7 @@
   </div>
     <div id="loader"></div>
     <!-- Page Content -->
-    <div class = "container-fluid animate-bottom" id = "tohide" style="margin-top: 60px; display: none;">
+    <div class = "container-fluid animate-bottom" id = "tohide" <?php if(!isset($_GET['print'])){ echo ' style="margin-top: 60px; display: none;"'; }else{ echo ' style = "visibility: hidden" '; }?>>
       <?php
       	/*if(!isset($_GET['module'])){
           include 'modules/main.php';
@@ -110,7 +114,7 @@
 	.table th, .table td {border: 0px !important;}
 </style>
 		<h3 align="center"><i><span class="icon-lock"></span><i class="fa fa-desktop"></i> Login Form</i></h3>
-		<form role = "form" action = "" method = "post" id = "tohide" style="display: none;">	
+		<form role = "form" class = "animate-bottom" action = "" method = "post" id = "tohide" style="display: none;">	
 			<table align = "center" class = "table form-horizontal" style = "margin-top: 0px; width: 800px;" >
 				<tr>
 					<td><label for = "uname"><span class="icon-user"></span>  Username: </label><input <?php if(isset($_POST['uname'])){ echo 'value ="' . $_POST['uname'] . '"'; }else{ echo 'autofocus ';}?>placeholder = "Enter Username" id = "uname" title = "Input your username." type = "text" class = "form-control input-sm" required name = "uname"/></td>
@@ -159,10 +163,5 @@
 include('config/footer.php');
 ?>
 <script>
-    NProgress.start();
-    $("#b-0").click(function() { NProgress.start(); });
-    $("#b-40").click(function() { NProgress.set(0.4); });
-    $("#b-inc").click(function() { NProgress.inc(); });
-    setTimeout(function() { NProgress.done(); document.getElementById("loader").style.display = "none"; $("#tohide").css('display','block'); }, 1300);
-    $("#b-100").click(function() { NProgress.done(); });	
+    	
 </script>

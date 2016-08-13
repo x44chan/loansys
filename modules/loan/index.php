@@ -33,7 +33,7 @@
 					</div>
 					<div class="col-md-4 col-xs-12">
 						<label>Contact No. <font color = "red"> * </font></label>
-						<input type = "text" name = "contact" class="form-control input-sm" placeholder = "09XXXXXXX" maxlength="11">
+						<input type = "text" name = "contact" class="form-control input-sm" placeholder = "09XXXXXXX" maxlength="11" pattern = "[0-9]*">
 					</div>
 				</div>
 			</div>
@@ -111,7 +111,7 @@
 			if($cust->execute() == TRUE){	
 				$cust_id = 	$conn->insert_id;
 			}
-			savelogs("Add new customer", 'Name ->' . $_POST['fname'] . ' ' . $_POST['mname'] . ' ' . $_POST['lname'] . ', Address -> ' . $_POST['address'] . ', Contact # -> ' . $_POST['contact']);
+			savelogs("Add new customer", 'Name -> ' . $_POST['fname'] . ' ' . $_POST['mname'] . ' ' . $_POST['lname'] . ', Address -> ' . $_POST['address'] . ', Contact # -> ' . $_POST['contact']);
 		}else{
 			$cust_id = mysqli_real_escape_string($conn, $_POST['customer']);
 		}
@@ -121,7 +121,7 @@
 			$sprate = 1;
 			$gerate['rate'] = $_POST['specialrate'];
 		}
-		$loan = $conn->prepare("INSERT INTO loan (customer_id, amount, duration, type, startdate, rate, specialrate) VALUES (?, ?, ?, ?, ?, ?, ?)");
+		$loan = $conn->prepare("INSERT INTO loan (customer_id, principal, duration, type, startdate, rate, specialrate) VALUES (?, ?, ?, ?, ?, ?, ?)");
 		$loan->bind_param("isssssi", $cust_id, $_POST['amount'], $_POST['duration'], $_POST['type'], $_POST['strtdate'], $gerate['rate'], $sprate);
 		if($loan->execute() == TRUE){
 			$loan_id = $conn->insert_id;
@@ -150,7 +150,7 @@
 				$breakdown->bind_param("isss", $loan_id, $deadline, $brkamnt, $inte);
 				$breakdown->execute();
 			}
-			savelogs("Add new loan", 'LoanID -> ' . $loan_id . ", Principal Amount -> " . $_POST['amount'] . ', Interest -> ' . number_format(($_POST['amount'] * $gerate['rate'])/$_POST['duration'],2) . ', Rate -> ' . $gerate['rate'] . ' Start Date -> ' . $_POST['strtdate'] . ', CustomerID -> ' . $cust_id);
+			savelogs("Add new loan", 'LoanID -> ' . $loan_id . ", Principal Amount -> " . number_format($_POST['amount'],2) . ', Interest -> ' . number_format(($_POST['amount'] * $gerate['rate'])/$_POST['duration'],2) . ', Rate -> ' . $gerate['rate'] . ' Start Date -> ' . $_POST['strtdate'] . ', CustomerID -> ' . $cust_id);
 			echo '<script type = "text/javascript">alert("Adding Record Successful");window.location.replace("/loan/?module=loan&action=list");</script>';
 		}
 	}

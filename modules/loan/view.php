@@ -1,11 +1,11 @@
 <?php
 	$loan_id = mysqli_real_escape_string($conn, $_GET['id']);
-	$list = "SELECT *,b.amount as loanamount FROM customer as a,loan as b,breakdown as c where a.customer_id = b.customer_id and b.loan_id = '$loan_id' and c.loan_id = '$loan_id' group by b.loan_id";
+	$list = "SELECT * FROM customer as a,loan as b,breakdown as c where a.customer_id = b.customer_id and b.loan_id = '$loan_id' and c.loan_id = '$loan_id' group by b.loan_id";
 	$res = $conn->query($list)->fetch_assoc();
 	if($conn->query($list)->num_rows <= 0){
 		echo '<script type = "text/javascript">alert("No record found.");window.location.replace("/loan/?module=loan&action=list");</script>';
 	}
-	$gerate = "SELECT ".strtolower($res['type']) ." as rate FROM rate";
+	$gerate = "SELECT ".strtolower($res['type']) ." as rate,penalty FROM rate";
 	$gerate = $conn->query($gerate)->fetch_assoc();
 ?>
 <div class="container">
@@ -48,7 +48,7 @@
 		<div class="row" style="margin-left: 20px;">
 			<div class="col-xs-2">
 				<label>Loan Amount <font color="red"> * </font></label>
-				<p style="margin-left: 10px;"><i>₱ <?php echo number_format($res['loanamount'],2);?></i></p>
+				<p style="margin-left: 10px;"><i>₱ <?php echo number_format($res['principal'],2);?></i></p>
 			</div>
 			<div class="col-xs-2">
 				<label>Rate <font color="red"> * </font></label>
@@ -56,11 +56,11 @@
 			</div>
 			<div class="col-xs-2">
 				<label>Interest <font color="red"> * </font></label>
-				<p style="margin-left: 10px;"><i>₱ <?php echo number_format($res['loanamount'] * $res['rate'],2);?></i></p>
+				<p style="margin-left: 10px;"><i>₱ <?php echo number_format($res['principal'] * $res['rate'],2);?></i></p>
 			</div>
 			<div class="col-xs-2">
 				<label>Total <font color="red"> * </font></label>
-				<p style="margin-left: 10px;"><i>₱ <?php echo number_format(($res['loanamount'] * $res['rate']) + $res['loanamount'],2);?></i></p>
+				<p style="margin-left: 10px;"><i>₱ <?php echo number_format(($res['principal'] * $res['rate']) + $res['principal'],2);?></i></p>
 			</div>
 			<div class="col-xs-2">
 				<label>Duration / Type <font color="red"> * </font></label>
@@ -77,12 +77,12 @@
 			</div>
 		</div>
 		<div class = "row">
-			<div class = "col-xs-2 col-xs-offset-1"><label>Date</label></div>
-			<div class = "col-xs-2"><label>Amount</label></div>
+			<div class = "col-xs-3" style="margin-left: 50px;"><label>Date</label></div>
+			<div class = "col-xs-2"><label>Principal Amount</label></div>
 			<div class = "col-xs-2"><label>Interest</label></div>
 			<div class = "col-xs-1"><label>Penalty</label></div>
 			<div class = "col-xs-2"><label>Due</label></div>
-			<div class = "col-xs-2"><label>Action/Status</label></div>
+			<div class = "col-xs-1"><label>Action/Status</label></div>
 		</div>
 		<?php
 			$breakdown = "SELECT * FROM breakdown where loan_id = '$res[loan_id]'";
@@ -99,10 +99,12 @@
 					$count = "SELECT count(*) as count FROM breakdown where loan_id = '$res[loan_id]' and deadline <= CURDATE()";
 					$count = $conn->query($count)->fetch_assoc();
 					$diff=date_diff(date_create($row['deadline']),date_create(date("Y-m-d")));
-					if($diff->format("%R%") == '+' && $diff->format("%a%") > 0 && $row['deadline'] <= date('Y-m-d')){
-						$onepen = number_format($row['amount'] * '.01', 2);
+					$xpayment = "SELECT breakdown_id,sum(payprincipal) as principal, sum(payinterest) as interest, sum(paypenalty) as penalty FROM payment where breakdown_id = '$row[breakdown_id]'";
+					$xpayment = $conn->query($xpayment)->fetch_object();
+					if($diff->format("%R%") == '+' && $diff->format("%a%") > 0 && $row['deadline'] <= date('Y-m-d') && $row['state'] == 0){
+						$onepen = ($row['amount'] + $row['interest']) * $gerate['penalty'];	
 						$penalty = '₱ ' . number_format($onepen * $diff->format("%a%"), 2);
-						$pen = number_format($onepen * $diff->format("%a%"),2);
+						$pen = str_replace(",", "", number_format(($onepen * $diff->format("%a%")),2));
 						$due = ' style = "color: red; font-weight: bold;" ';
 						$diff = '( ' . $diff->format("%a%") . ' day/s )';
 						$pay = 1;
@@ -112,30 +114,63 @@
 						$diff = "";
 						$due = "";
 						$penalty = ' - ';
+						
+					}
+					if($row['state'] == 1 && $xpayment->penalty > 0){
+						$penalty = '₱ ' . str_replace(",", "", number_format($xpayment->penalty,2));
+						$pen = str_replace(",", "", number_format($xpayment->penalty,2));
 					}
 					if($row['state'] != 0){
 						$throu = ' style = "text-decoration: line-through; " ';
 						$due = " style = 'color: green; font-weight: bold;'";
 					}else{						
-						$totalpen += str_replace(",", "", number_format($pen,2));
-						$totaldue += str_replace(",", "", number_format($pen + $row['amount'] + $row['interest'],2));
-						$totalamount += str_replace(",", "", number_format($row['amount'],2));
-						$totalinte += str_replace(",", "", number_format($row['interest'],2));
+						$totalpen += str_replace(",", "", number_format($pen - $xpayment->penalty,2));
+						$totaldue += str_replace(",", "", number_format($pen + $row['amount'] + $row['interest'] - ($xpayment->principal + $xpayment->interest + $xpayment->penalty),2));
+						$totalamount += str_replace(",", "", number_format($row['amount'] - $xpayment->principal,2));
+						$totalinte += str_replace(",", "", number_format($row['interest'] - $xpayment->interest,2));
 					}
+					$forexec = str_replace(",", "", number_format($pen + $row['amount'] + $row['interest'],2));
+					
+					//pending payments and payment button
 					echo '<div class = "row"' . $due .'>';
-					echo	'<div class = "col-xs-2 col-xs-offset-1"><i><p>' . date("M j, Y", strtotime($row['deadline'])) . ' ' . $diff . '</p></i></div>';
+					echo	'<div class = "col-xs-3" style="margin-left: 50px;"><i><p>[ ID: ' . $row['breakdown_id'] . ' ] ' . date("M j, Y", strtotime($row['deadline'])) . ' ' . $diff . '</p></i></div>';
 					echo	'<div class = "col-xs-2"><i><p '.$throu.'>₱ ' . number_format($row['amount'],2) . '</p></i></div>';
 					echo	'<div class = "col-xs-2"><i><p '.$throu.'>₱ ' . number_format($row['interest'],2) . '</p></i></div>';
 					echo	'<div class = "col-xs-1"><i><p '.$throu.'>' . $penalty . '</p></i></div>';
 					echo	'<div class = "col-xs-2"><i><p '.$throu.'>₱ ' . number_format($pen + $row['amount'] + $row['interest'],2) . '</p></i></div>';
-					if($row['state'] == 0 && $row['deadline'] <= date('Y-m-d')){
-						echo 	'<div class = "col-xs-2"><i><p><a onclick = "setTimeout(\'window.location.href=window.location.href\', 0);" target = "_blank" href = "?module=loan&action=payment&id=' . $_GET['id'] . '&paid='.$row['breakdown_id'].'" class = "btn btn-primary btn-sm"  onclick = "return confirm(\'Are you sure?\');"> Paid </a></div>';
+					if($row['state'] == 0 && (date("m", strtotime($row['deadline'])) <= date('m') || date("m", strtotime($row['deadline'])) <= date('m') + 1) && date("y", strtotime($row['deadline'])) <= date('y')){
+						echo 	'<div class = "col-xs-1"><i><p><a onclick = "payment('.$row['breakdown_id'].','.$forexec.');" class = "btn btn-primary btn-sm"  onclick = "return confirm(\'Are you sure?\');"> Add Payment </a></div>';
 					}elseif($pay == 0 && $row['deadline'] > date('Y-m-d')){
-						echo 	'<div class = "col-xs-2"><i><p> - </p></i></div>';	
+						echo 	'<div class = "col-xs-1"><i><p> - </p></i></div>';	
 					}else{
-						echo 	'<div class = "col-xs-2"><i><p>Paid</p></i></div>';	
+						echo 	'<div class = "col-xs-1"><i><p>Paid</p></i></div>';	
 					}
 					echo '</div>';
+					
+					//payment details
+					$payment = "SELECT * FROM payment where breakdown_id = '$row[breakdown_id]'";
+					$payment = $conn->query($payment);
+					if($payment->num_rows > 0 && $row['state'] == 0){
+						while ($payrow = $payment->fetch_array()) {
+							echo '<div class = "row">';
+								echo	'<div class = "col-xs-3" style="margin-left: 50px;"><i><p> <b>Payment <br>('. date("M j, Y h:i A", strtotime($payrow['paydate'])) . ')</b> </p></i></div>';
+								echo	'<div class = "col-xs-2"><i><p>₱ ' . number_format($payrow['payprincipal'],2) . '</p></i></div>';
+								echo	'<div class = "col-xs-2"><i><p>₱ ' . number_format($payrow['payinterest'],2) . '</p></i></div>';
+								echo	'<div class = "col-xs-1"><i><p>₱ ' . number_format($payrow['paypenalty'],2) . '</p></i></div>';
+								echo	'<div class = "col-xs-2"><i><p>₱ ' . number_format($payrow['payprincipal'] + $payrow['payinterest'] + $payrow['paypenalty'],2) . '</p></i></div>';
+							echo '</div>';		
+						}
+						echo '<div class = "row"><div class = "col-xs-9" style="margin-left: 50px;"><hr></div></div>';
+						echo '<div class = "row" style = "color: green;">';
+							echo	'<div class = "col-xs-3" style="margin-left: 50px;"><b>Balance</div>';
+							echo	'<div class = "col-xs-2"><i><p>₱ ' . number_format($row['amount'] - $xpayment->principal,2) . '</p></i></div>';
+							echo	'<div class = "col-xs-2"><i><p>₱ ' . number_format($row['interest']- $xpayment->interest,2) . '</p></i></div>';
+							echo	'<div class = "col-xs-1"><i><p>₱ ' . number_format($pen - $xpayment->penalty,2) . '</p></i></div>';
+							echo	'<div class = "col-xs-2"><i><p>₱ ' . number_format(($pen + $row['amount'] + $row['interest']) - ($xpayment->principal + $xpayment->interest + $xpayment->penalty),2) . '</b></p></i></div>';
+						echo '</div>';
+						echo '<div class = "row"><div class = "col-xs-9" style="margin-left: 50px;"><hr></div></div>';
+					}
+					/*/due counter
 					if($counter == $count['count'] && $row['state'] == 0){
 						echo '<div class = "row">';
 						echo	'<div class = "col-xs-12"><hr></div>';
@@ -146,14 +181,67 @@
 						echo	'<div class = "col-xs-2">₱ ' . number_format($totalinte,2) . '</div>';
 						echo	'<div class = "col-xs-1">₱ ' . number_format($totalpen,2) . '</div>';
 						echo	'<div class = "col-xs-2">₱ ' . number_format($totaldue,2) . '</div>';
-						echo 	'<div class = "col-xs-2"><i><p><a onclick = "setTimeout(\'window.location.href=window.location.href\', 0);" target = "_blank" href = "?module=loan&action=payment&id=' . $_GET['id'] . '&paid=all" class = "btn btn-success btn-sm"  onclick = "return confirm(\'Are you sure?\');"> Paid All </a></div>';
+						//echo 	'<div class = "col-xs-2"><i><p><a onclick = "setTimeout(\'window.location.href=window.location.href\', 0);" target = "_blank" href = "?module=loan&action=payment&id=' . $_GET['id'] . '&paid=all" class = "btn btn-success btn-sm"  onclick = "return confirm(\'Are you sure?\');"> Paid All </a></div>';
 						echo '</div>';
 						echo '<div class = "row">';
 						echo	'<div class = "col-xs-12"><hr></div>';
 						echo '</div>';
-					}
+					}*/
+				}
+			}
+		?>
+		<?php
+			//payment history
+			$loanid = mysqli_real_escape_string($conn, $_GET['id']);
+			$payment = "SELECT *,payment.paydate as breakpay FROM payment,breakdown where breakdown.breakdown_id = payment.breakdown_id and breakdown.loan_id = '$loanid'";
+			$payment = $conn->query($payment);
+			if($payment->num_rows > 0){
+		?>
+			<div class="row">
+				<div class="col-xs-12">
+					<u><i><h5><b><span class="icon-tree"></span> Payment History</b></h5></i></u>
+				</div>
+			</div>
+			<div class = "row">
+				<div class = "col-xs-3" style="margin-left: 50px;"><label>Date of Payment</label></div>
+				<div class = "col-xs-2"><label>Principal Amount</label></div>
+				<div class = "col-xs-2"><label>Interest</label></div>
+				<div class = "col-xs-1"><label>Penalty</label></div>
+				<div class = "col-xs-2"><label>Due</label></div>
+			</div>
+		<?php			
+				while ($payrow = $payment->fetch_array()) {
+					echo '<div class = "row">';
+						echo	'<div class = "col-xs-3" style="margin-left: 50px;"><i><p> <b>[ ID: '. $payrow['breakdown_id'] . ' ] ('. date("M j, Y h:i A", strtotime($payrow['breakpay'])) . ')</b> </p></i></div>';
+						echo	'<div class = "col-xs-2"><i><p>₱ ' . number_format($payrow['payprincipal'],2) . '</p></i></div>';
+						echo	'<div class = "col-xs-2"><i><p>₱ ' . number_format($payrow['payinterest'],2) . '</p></i></div>';
+						echo	'<div class = "col-xs-1"><i><p>₱ ' . number_format($payrow['paypenalty'],2) . '</p></i></div>';
+						echo	'<div class = "col-xs-2"><i><p>₱ ' . number_format($payrow['payprincipal'] + $payrow['payinterest'] + $payrow['paypenalty'],2) . '</p></i></div>';
+					echo '</div>';		
 				}
 			}
 		?>
 	</div>
 </div>
+<div class="modal fade" id="payment" role="dialog">
+
+</div>
+<?php
+	if(isset($_POST['paysub'])){
+		$breakdown_id = mysqli_real_escape_string($conn, $_POST['breakdown_id']);
+		$payment = $conn->prepare("INSERT INTO payment (breakdown_id, payprincipal, payinterest, paypenalty, paydate) VALUES (?, ?, ?, ?, now())");
+		$payment->bind_param("isss", $_POST['breakdown_id'], $_POST['prin'], $_POST['inte'], $_POST['penal']);
+		if($payment->execute() == TRUE){
+			savelogs("Add payment", "Payment for Break Down #: " . $_POST['breakdown_id'] . ' , Principal -> ₱ ' . number_format($_POST['prin'],2) . ' , Interest -> ₱ ' . number_format($_POST['inte'],2) . ' , Penalty -> ₱ ' . number_format($_POST['penal'],2));
+			$xpayment = "SELECT breakdown_id,sum(payprincipal) as principal, sum(payinterest) as interest, sum(paypenalty) as penalty FROM payment where breakdown_id = '$breakdown_id'";
+			$xpayment = $conn->query($xpayment)->fetch_object();
+			if(str_replace(",", "", $_POST['forexec']) - ($xpayment->principal + $xpayment->interest + $xpayment->penalty) <= 0){
+				$peks = "UPDATE breakdown set state = 1 where breakdown_id = '$_POST[breakdown_id]' and state = 0";
+				if ($conn->query($peks) === TRUE) {
+					savelogs("Full paid", "Break Down #: " . $_POST['breakdown_id']);
+				}	
+			}
+			echo '<script type = "text/javascript">alert("Payment Successful");window.location.replace("/loan/?module=loan&action=view&id='.$_GET['id'].'");</script>';
+		}
+	}
+?>

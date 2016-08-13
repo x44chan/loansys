@@ -1,4 +1,40 @@
 <?php
+	if(isset($_GET['payment'])){
+?>
+	<div class="modal-dialog">    
+    	<!-- Modal content-->
+    	<div class="modal-content">
+	        <div class="modal-header" style="padding:35px 50px;">
+	        	<button type="button" class="close" data-dismiss="modal">&times;</button>
+	        	<h4><span class = "icon-coin-dollar"></span>Payment</h4>
+	        </div>
+	        <div class="modal-body" style="padding:40px 50px;">
+	        	<form role="form" action = "" method = "post">
+	        		<div class="form-group">
+	            		<label>Principal </label>
+	            		<input value = '0' type = "text" name = "prin" class="form-control input-sm" placeholder = "Enter amount" pattern = "[.0-9]*" required>
+		            </div>
+		            <div class="form-group">
+	            		<label>Interest </label>
+	            		<input value = '0' type = "text" name = "inte" class="form-control input-sm" placeholder = "Enter amount" pattern = "[.0-9]*" required>
+	            	</div>
+	            	<div class="form-group">
+	            		<label>Penalty </label>
+	            		<input value = '0' type = "text" name = "penal" class="form-control input-sm" placeholder = "Enter amount" pattern = "[.0-9]*">
+	            	</div>
+	            	<input type = "hidden" name = "breakdown_id" value = "<?php echo $_GET['payment'];?>">
+	            	<input type = "hidden" name = "forexec" value = "<?php echo number_format($_GET['exec'],2);?>">
+	            	<button type="submit" name = "paysub" class="btn btn-success btn-block"><span class ="icon-checkmark"></span> Add payment</button>
+	          	</form>
+	    	</div>
+    	</div>
+    </div>
+<?php
+	}
+
+?>
+
+<?php
 if(isset($_GET['amount']) && isset($_GET['type']) && isset($_GET['duration']) && isset($_GET['strtdate'])){
 	include '../config/conf.php';
 	$amount = mysqli_real_escape_string($conn, $_GET['amount']);
@@ -130,7 +166,7 @@ if(isset($_GET['amount']) && isset($_GET['type']) && isset($_GET['duration']) &&
 	</div>
 </div>
 <div class="row">
-	<div class="col-md-2 col-xs-3 col-md-offset-1">
+	<div class="col-md-2 col-xs-3 col-md-offset-2 col-xs-offset-1">
 
 	</div>
 	<div class="col-md-2 col-xs-3" align="center">

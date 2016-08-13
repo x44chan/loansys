@@ -8,6 +8,7 @@
 		<table class="table">
 			<thead>
 				<tr>
+					<th>#</th>
 					<th>Name</th>
 					<th>Loan Amount</th>
 					<th>Interest</th>
@@ -33,13 +34,16 @@
 					    $_GET['page'] = $totalPages;
 					}
 					$startArticle = ($_GET['page'] - 1) * $perpage;
-					$list = "SELECT *,b.amount as principal FROM customer as a,loan as b,breakdown as c where a.customer_id = b.customer_id and b.loan_id = c.loan_id and c.state = '0' group by b.loan_id LIMIT " . $startArticle . ', ' . $perpage;
+					$list = "SELECT * FROM customer as a,loan as b,breakdown as c where a.customer_id = b.customer_id and b.loan_id = c.loan_id and c.state = '0' group by b.loan_id LIMIT " . $startArticle . ', ' . $perpage;
 					$res = $conn->query($list);
 					if($res->num_rows > 0){
+						$num = 0;
 						while ($row = $res->fetch_assoc()) {
 							$gerate = "SELECT ".strtolower($row['type']) ." as rate FROM rate";
-							$gerate = $conn->query($gerate)->fetch_assoc();	
+							$gerate = $conn->query($gerate)->fetch_assoc();
+							$num += 1;	
 							echo '<tr>';
+							echo '<td>' . $num . '</td>';
 							echo '<td>' . $row['fname'] . ' ' . $row['mname'] . ' ' . $row['lname'] . ' ( ' . $row['customer_id'] . ' )</td>';
 							echo '<td>₱ ' . number_format($row['principal'],2) . '</td>';
 							echo '<td>₱ ' . number_format($row['principal'] * $row['rate'],2) . '</td>';
