@@ -8,7 +8,7 @@
 	$gerate = "SELECT ".strtolower($res['type']) ." as rate,penalty FROM rate";
 	$gerate = $conn->query($gerate)->fetch_assoc();
 ?>
-<div class="container">
+<div class="container" id = "reportg">
 	<div class="row">
 		<div class="col-xs-6">
 			<i><h4  style="margin-left: -40px;"><span class="icon-coin-dollar"></span><u> Loan Information</u></h4></i>
@@ -245,3 +245,6 @@
 		}
 	}
 ?>
+<script type="text/javascript">
+	document.title = "View Loan -> <?php echo $res['fname'] . ' ' . $res['mname'] . ' ' . $res['lname']?>"; 
+</script>

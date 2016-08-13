@@ -1,4 +1,9 @@
 <?php
+	if(!isset($_GET['module'])){
+		echo '<script type = "text/javascript">window.location.replace("/loan/");</script>';
+	}
+?>
+<?php
 	if(isset($_GET['payment'])){
 ?>
 	<div class="modal-dialog">    

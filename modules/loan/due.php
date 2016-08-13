@@ -12,6 +12,7 @@
 		<table class="table">
 			<thead>
 				<tr>
+					<th>#</th>
 					<th>Name</th>
 					<th>Principal Amount</th>
 					<th>Interest</th>
@@ -52,6 +53,7 @@
 						$totaldue += $row->amount + $row->interest + str_replace(",", "", $penalty);
 			?>
 				<tr <?php echo $duex;?>>
+					<td>[ ID: <?php echo $row->breakdown_id;?> ]</td>
 					<td><?php echo $row->fname . ' ' . $row->mname . ' ' . $row->lname; ?></td>
 					<td>₱ <?php echo number_format($row->amount - $xpayment->principal,2); ?></td>
 					<td>₱ <?php echo number_format($row->interest - $xpayment->interest,2); ?></td>
@@ -64,6 +66,7 @@
 				}
 			?>
 				<tr>
+					<td></td>
 					<td align="center"><b><i>Total</b></td>
 					<td><b><i>₱ <?php echo number_format($totalprin - $xpayment->principal,2); ?></td>
 					<td><b><i>₱ <?php echo number_format($totalint - $xpayment->interest,2); ?></td>
