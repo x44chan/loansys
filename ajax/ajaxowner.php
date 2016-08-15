@@ -1,6 +1,57 @@
 <?php
+	include '../config/conf.php';
 	if(!isset($_GET['module'])){
 		echo '<script type = "text/javascript">window.location.replace("/loan/");</script>';
+	}
+?>
+<?php
+	if(isset($_GET['loanlist'])){
+?>
+	<?php
+		$search = mysqli_real_escape_string($conn, $_GET['loanlist']);
+		$search = str_replace(",", "", $search);
+		$where = " and (fname like '%$search%' or mname like '%$search%' or lname like '%$search%' or principal like '%$search%' or duration like '%$search%' or type like '%$search%') ";
+		if($search == ""){
+			$where = "";
+		}
+		$counter = "SELECT count(*) as total FROM customer as a,loan as b,breakdown as c where a.customer_id = b.customer_id and b.loan_id = c.loan_id and c.state = '0' " . $where . " group by b.loan_id";
+		$counter2 = $conn->query($counter)->fetch_assoc();
+		$perpage = 2;
+		$totalPages = ceil($counter2['total'] / $perpage);
+		if(!isset($_GET['page'])){
+		    $_GET['page'] = 0;
+		}else{
+		    $_GET['page'] = (int)$_GET['page'];
+		}
+		if($_GET['page'] < 1){
+		    $_GET['page'] = 1;
+		}else if($_GET['page'] > $totalPages){
+		    $_GET['page'] = $totalPages;
+		}
+		$startArticle = ($_GET['page'] - 1) * $perpage;
+		$list = "SELECT * FROM customer as a,loan as b,breakdown as c where a.customer_id = b.customer_id and b.loan_id = c.loan_id and c.state = '0' " . $where . " group by b.loan_id LIMIT " . $startArticle . ', ' . $perpage;
+		$res = $conn->query($list);
+		if($res->num_rows > 0){
+			$num = 0;
+			while ($row = $res->fetch_assoc()) {
+				$gerate = "SELECT ".strtolower($row['type']) ." as rate FROM rate";
+				$gerate = $conn->query($gerate)->fetch_assoc();
+				$num += 1;	
+				echo '<tr>';
+				echo '<td>' . $num . '</td>';
+				echo '<td>' . $row['fname'] . ' ' . $row['mname'] . ' ' . $row['lname'] . ' ( ' . $row['customer_id'] . ' )</td>';
+				echo '<td>₱ ' . number_format($row['principal'],2) . '</td>';
+				echo '<td>₱ ' . number_format($row['principal'] * $row['rate'],2) . '</td>';
+				echo '<td>₱ ' . number_format(str_replace(",", "", number_format($row['principal'] * $row['rate'],2)) + str_replace(",", "", number_format($row['principal'],2)),2) . '</td>';
+				echo '<td>' . $row['duration'] . ' - ' . $row['type'] . '</td>';
+				echo '<td><a href = "?module=loan&action=view&id='.$row['loan_id'].'" class = "btn btn-sm btn-primary"> View Details </a></td>';
+				echo '</tr>';
+			}
+		}else{
+			echo '<tr><td colspan = "6" align = "center"> <h5> No Record Found </h5></td></tr>';
+		}
+	?>
+<?php
 	}
 ?>
 <?php
@@ -41,7 +92,6 @@
 
 <?php
 if(isset($_GET['amount']) && isset($_GET['type']) && isset($_GET['duration']) && isset($_GET['strtdate'])){
-	include '../config/conf.php';
 	$amount = mysqli_real_escape_string($conn, $_GET['amount']);
 	$type = mysqli_real_escape_string($conn, $_GET['type']);
 	$duration = mysqli_real_escape_string($conn, intval($_GET['duration']));

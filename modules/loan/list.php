@@ -1,7 +1,10 @@
 <div class="container">
 	<div class="row">
-		<div class="col-xs-12">
+		<div class="col-xs-6">
 			<i><h4  style="margin-left: -40px;"><span class="icon-list"></span><u> Loan List</u></h4></i>
+		</div>
+		<div class="col-xs-4 pull-right">
+			<input type = "text" placeholder = "Search Box" onkeyup = "loanList(this.value)" class="form-control input-sm">
 		</div>
 	</div>
 	<div style="border: 1px solid #eee; padding: 0px 10px 10px 10px; border-radius: 5px;">
@@ -17,7 +20,7 @@
 					<th>Action</th>
 				</tr>
 			</thead>
-			<tbody>
+			<tbody id = "onchange">
 				<?php
 					$counter = "SELECT count(*) as total FROM customer as a,loan as b,breakdown as c where a.customer_id = b.customer_id and b.loan_id = c.loan_id and c.state = '0' group by b.loan_id";
 					$counter2 = $conn->query($counter)->fetch_assoc();
@@ -65,7 +68,7 @@
 			<label> Pages </label><br>
 			<?php
 				$prev = intval($_GET['page'])-1;					
-				if($prev > 0){ echo '<a data-toggle="tooltip" title="Previous" class = "btn btn-default btn-sm" style = "margin: 5px;" href="?page=' . $prev . '"> < </a>'; }
+				if($prev > 0){ echo '<a data-toggle="tooltip" title="Previous" class = "btn btn-default btn-sm" style = "margin: 5px;" href="?module=loan&action=list&page=' . $prev . '"> < </a>'; }
 				foreach(range(1, $totalPages) as $page){
 				    if($page == $_GET['page']){
 				        echo '<b><span class="currentpage" style = "margin: 5px;">' . $page . '</span></b>';
@@ -73,11 +76,11 @@
 				    	if($page == 0){
 				    		continue;
 				    	}
-				        echo '<a class = "btn btn-default btn-sm" data-toggle="tooltip" title="Page ' . $page . '" style = "margin: 5px;" href="?page=' . $page . '">' . $page . '</a>';
+				        echo '<a class = "btn btn-default btn-sm" data-toggle="tooltip" title="Page ' . $page . '" style = "margin: 5px;" href="?module=loan&action=list&page=' . $page . '">' . $page . '</a>';
 				    }
 				}
 				$nxt = intval($_GET['page'])+1;
-				if($nxt <= $totalPages){ echo '<a class = "btn btn-default btn-sm" data-toggle="tooltip" title="Next" style = "margin: 5px;" href="?page=' . $nxt . '"> > </a>'; }
+				if($nxt <= $totalPages){ echo '<a class = "btn btn-default btn-sm" data-toggle="tooltip" title="Next" style = "margin: 5px;" href="?module=loan&action=list&page=' . $nxt . '"> > </a>'; }
 			?>
 		</div>
 	</div>
