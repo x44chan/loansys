@@ -1,3 +1,8 @@
+<?php
+	if($access->level <= 1){
+		echo '<script type = "text/javascript">alert("Restricted.");window.location.replace("/loan");</script>';
+	}
+?>
 <div class="container-fluid" style="font-size: 13.5px; margin: 0 20px 0 20px;">
 	<div class="row">
 		<div class="col-xs-12" align="center">

@@ -3,6 +3,7 @@
 <html lang="en">
 	<head>
 		<title> Loan <?php if(isset($title)){echo ' - ' . $title; }?> </title>
+		<base href="http://localhost/loan/"/>
 		<meta charset="utf-8">
   		<meta name="viewport" content="width=device-width, initial-scale=1">		
 		<!-- Latest compiled and minified CSS -->

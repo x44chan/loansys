@@ -151,7 +151,7 @@
 				$breakdown->execute();
 			}
 			savelogs("Add new loan", 'LoanID -> ' . $loan_id . ", Principal Amount -> " . number_format($_POST['amount'],2) . ', Interest -> ' . number_format(($_POST['amount'] * $gerate['rate'])/$_POST['duration'],2) . ', Rate -> ' . $gerate['rate'] . ' Start Date -> ' . $_POST['strtdate'] . ', CustomerID -> ' . $cust_id);
-			echo '<script type = "text/javascript">alert("Adding Record Successful");window.location.replace("/loan/?module=loan&action=list");</script>';
+			echo '<script type = "text/javascript">alert("Adding Record Successful");window.location.replace("loan/list");</script>';
 		}
 	}
 	

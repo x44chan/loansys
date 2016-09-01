@@ -1,5 +1,5 @@
 <?php
-	$loan_id = mysqli_real_escape_string($conn, $_GET['id']);
+	$loan_id = mysqli_real_escape_string($conn, $_GET['view']);
 	$list = "SELECT * FROM customer as a,loan as b,breakdown as c where a.customer_id = b.customer_id and b.loan_id = '$loan_id' and c.loan_id = '$loan_id' group by b.loan_id";
 	$res = $conn->query($list)->fetch_assoc();
 	if($conn->query($list)->num_rows <= 0){
@@ -138,12 +138,16 @@
 					echo	'<div class = "col-xs-2"><i><p '.$throu.'>₱ ' . number_format($row['interest'],2) . '</p></i></div>';
 					echo	'<div class = "col-xs-1"><i><p '.$throu.'>' . $penalty . '</p></i></div>';
 					echo	'<div class = "col-xs-2"><i><p '.$throu.'>₱ ' . number_format($pen + $row['amount'] + $row['interest'],2) . '</p></i></div>';
-					if($row['state'] == 0 && (date("m", strtotime($row['deadline'])) <= date('m') || date("m", strtotime($row['deadline'])) <= date('m') + 1) && date("y", strtotime($row['deadline'])) <= date('y')){
-						echo 	'<div class = "col-xs-1"><i><p><a onclick = "payment('.$row['breakdown_id'].','.$forexec.');" class = "btn btn-primary btn-sm"  onclick = "return confirm(\'Are you sure?\');"> Add Payment </a></div>';
-					}elseif($pay == 0 && $row['deadline'] > date('Y-m-d')){
-						echo 	'<div class = "col-xs-1"><i><p> - </p></i></div>';	
+					if($access->level >= 2){
+						if($row['state'] == 0 && (date("m", strtotime($row['deadline'])) <= date('m') || date("m", strtotime($row['deadline'])) <= date('m') + 1) && date("y", strtotime($row['deadline'])) <= date('y')){
+							echo 	'<div class = "col-xs-1"><i><p><a onclick = "payment('.$row['breakdown_id'].','.$forexec.');" class = "btn btn-primary btn-sm"  onclick = "return confirm(\'Are you sure?\');"> Add Payment </a></div>';
+						}elseif($pay == 0 && $row['deadline'] > date('Y-m-d')){
+							echo 	'<div class = "col-xs-1"><i><p> - </p></i></div>';	
+						}else{
+							echo 	'<div class = "col-xs-1"><i><p>Paid</p></i></div>';	
+						}
 					}else{
-						echo 	'<div class = "col-xs-1"><i><p>Paid</p></i></div>';	
+						echo 	'<div class = "col-xs-1"><i><p> - </p></i></div>';
 					}
 					echo '</div>';
 					
@@ -181,7 +185,7 @@
 						echo	'<div class = "col-xs-2">₱ ' . number_format($totalinte,2) . '</div>';
 						echo	'<div class = "col-xs-1">₱ ' . number_format($totalpen,2) . '</div>';
 						echo	'<div class = "col-xs-2">₱ ' . number_format($totaldue,2) . '</div>';
-						//echo 	'<div class = "col-xs-2"><i><p><a onclick = "setTimeout(\'window.location.href=window.location.href\', 0);" target = "_blank" href = "?module=loan&action=payment&id=' . $_GET['id'] . '&paid=all" class = "btn btn-success btn-sm"  onclick = "return confirm(\'Are you sure?\');"> Paid All </a></div>';
+						//echo 	'<div class = "col-xs-2"><i><p><a onclick = "setTimeout(\'window.location.href=window.location.href\', 0);" target = "_blank" href = "?module=loan&action=payment&id=' . $_GET['view'] . '&paid=all" class = "btn btn-success btn-sm"  onclick = "return confirm(\'Are you sure?\');"> Paid All </a></div>';
 						echo '</div>';
 						echo '<div class = "row">';
 						echo	'<div class = "col-xs-12"><hr></div>';
@@ -192,7 +196,7 @@
 		?>
 		<?php
 			//payment history
-			$loanid = mysqli_real_escape_string($conn, $_GET['id']);
+			$loanid = mysqli_real_escape_string($conn, $_GET['view']);
 			$payment = "SELECT *,payment.paydate as breakpay FROM payment,breakdown where breakdown.breakdown_id = payment.breakdown_id and breakdown.loan_id = '$loanid'";
 			$payment = $conn->query($payment);
 			if($payment->num_rows > 0){
@@ -241,7 +245,7 @@
 					savelogs("Full paid", "Break Down #: " . $_POST['breakdown_id']);
 				}	
 			}
-			echo '<script type = "text/javascript">alert("Payment Successful");window.location.replace("/loan/?module=loan&action=view&id='.$_GET['id'].'");</script>';
+			echo '<script type = "text/javascript">alert("Payment Successful");window.location.replace("loan/view/'.$_GET['view'].'");</script>';
 		}
 	}
 ?>

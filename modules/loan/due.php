@@ -63,7 +63,6 @@
 				</tr>
 			<?php	
 					}
-				}
 			?>
 				<tr>
 					<td></td>
@@ -74,6 +73,12 @@
 					<td><b><i>₱ <?php echo number_format($totaldue - ($xpayment->principal + $xpayment->interest + $xpayment->penalty),2); ?></td>
 					<td></td>
 				</tr>
+			<?php
+				}else{
+					echo '<td colspan = 7 align = center> <h4> No Due </h4></td>';
+				}
+			?>
+				
 			</tbody>
 		</table>
 	</div>	
@@ -81,6 +86,6 @@
 
 <?php
 	if(isset($_GET['print'])){
-		echo '<script type = "text/javascript">	window.print();window.location.href = "?module='.$_GET['module'].'&action='.$_GET['action'].'";</script>';
+		echo '<script type = "text/javascript">	window.print();window.location.href = "'.$_GET['module'].'/'.$_GET['action'].'";</script>';
 	}
 ?>

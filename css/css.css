@@ -165,7 +165,6 @@ html {
   body * {
     visibility: hidden;
   }
-  @page{ size: A4;}
   #reportg h4{
     font-size: 15px;
   }
@@ -206,7 +205,7 @@ html {
   }
 }
 
-#redx td{
+#redx *{
   color: red !important;
   font-weight: bold;
 }
