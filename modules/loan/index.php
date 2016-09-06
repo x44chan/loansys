@@ -67,6 +67,24 @@
 			</div>
 			<div class="row" style="margin-left: 20px;">
 				<div class="col-md-3 col-xs-12">
+					<label>Principal ID<font color = "red"> *</font></label>
+					<select class="form-control input-sm" name = "principalid" required>
+						<option value=""> - - - - - - </option>
+						<?php
+							$principal = "SELECT * FROM principal";
+							$principal = $conn->query($principal);
+							if($principal->num_rows > 0){
+								while ($row = $principal->fetch_object()) {
+									echo '<option value = "' . $row->principal_id . '"> ' . number_format($row->principal_amount,2) . ' </option>';
+								}
+							}
+						?>
+					</select>
+					<hr>
+				</div>
+			</div>
+			<div class="row" style="margin-left: 20px;">
+				<div class="col-md-3 col-xs-12">
 					<label>Loan/Principal Amount<font color = "red"> *</font></label>
 					<input type = "text" name = "amount" class="form-control input-sm" placeholder = "Enter Loan Amount" required pattern = "[.0-9]*" autocomplete = "off" onchange="showUser()">
 				</div>
@@ -79,12 +97,12 @@
 					</select>
 				</div>
 				<div class="col-md-2 col-xs-12">
-					<label>Duration (in numbers)<font color = "red"> * </font></label>
+					<label>Duration(in numbers) <font color = "red">*</font></label>
 					<input type = "text" name = "duration" class="form-control input-sm" placeholder = "Enter duration" required pattern = "[0-9]*" onchange="showUser()" autocomplete = "off">
 				</div>
-				<div class="col-md-3 col-xs-12">
-					<label>Start Date <font color = "red"> * </font></label>
-					<input type = "date" name = "strtdate" class="form-control input-sm" min = "<?php echo date('Y-m-d');?>" max = "<?php echo date('9999-m-d');?>" required onchange="showUser()" autocomplete = "off">
+				<div class="col-md-2 col-xs-12">
+					<label>Start Date <font color = "red">*</font></label>
+					<input type = "date" style="width: 100%;" data-date='{"startView": 2, "openOnMouseFocus": true}' placeholder = "YYYY-MM-DD" name = "strtdate" class="form-control input-sm" min = "<?php echo date('Y-m-d');?>" max = "<?php echo date('9999-m-d');?>" required onchange="showUser()" autocomplete = "off">
 				</div>
 				<div class="col-md-2 col-xs-12">
 					<label>Special Rate <font color = "red" id = "asterisk" style="display: none;"> * </font></label>
@@ -97,7 +115,7 @@
 			<div class="row" style="margin-top: 20px;">
 				<div class="col-xs-12" align="center">
 					<hr>
-					<button class="btn btn-primary btn-sm" name = "loansub" onclick = "return confirm('Are you sure?');"><span class = "icon-floppy-disk"></span> Save </button>
+					<button class="btn btn-primary btn-sm" name = "loansub" onclick = "return confirm('Are you sure?');"><span class = "icon-floppy-disk"></span> Save & <span class = "icon-printer"></span> Print </button>
 				</div>
 			</div>
 		</div>		
@@ -121,17 +139,18 @@
 			$sprate = 1;
 			$gerate['rate'] = $_POST['specialrate'];
 		}
-		$loan = $conn->prepare("INSERT INTO loan (customer_id, principal, duration, type, startdate, rate, specialrate) VALUES (?, ?, ?, ?, ?, ?, ?)");
-		$loan->bind_param("isssssi", $cust_id, $_POST['amount'], $_POST['duration'], $_POST['type'], $_POST['strtdate'], $gerate['rate'], $sprate);
+		if($_POST['type'] == 'Daily'){
+			$type = 'Day';
+		}elseif($_POST['type'] == 'Weekly'){
+			$type = 'Week';
+		}else{
+			$type = 'Month';
+		}
+		$due = date("Y-m-d", strtotime("+".$_POST['duration'].' '. $type, strtotime($_POST['strtdate'])));
+		$loan = $conn->prepare("INSERT INTO loan (customer_id, principal_id, principal, duration, type, startdate, rate, specialrate, due) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+		$loan->bind_param("iisssssis", $cust_id, $_POST['principalid'], $_POST['amount'], $_POST['duration'], $_POST['type'], $_POST['strtdate'], $gerate['rate'], $sprate, $due);
 		if($loan->execute() == TRUE){
 			$loan_id = $conn->insert_id;
-			if($_POST['type'] == 'Daily'){
-				$_POST['type'] = 'Day';
-			}elseif($_POST['type'] == 'Weekly'){
-				$_POST['type'] = 'Week';
-			}else{
-				$_POST['type'] = 'Month';
-			}
 			$total = 0;
 			$totalinte = 0;
 			for($i = 0; $i < $_POST['duration']; $i++){	
@@ -146,12 +165,20 @@
 					$inte += number_format(($_POST['amount'] * $gerate['rate']) - $totalinte,2);
 				}
 				$breakdown = $conn->prepare("INSERT INTO breakdown (loan_id, deadline, amount, interest) VALUES (?, ?, ?, ?)");
-				$deadline = date("Y-m-d", strtotime("+".$i.' '. $_POST['type'], strtotime(mysqli_real_escape_string($conn, $_POST['strtdate']))));
+				$deadline = date("Y-m-d", strtotime("+".$i.' '. $type, strtotime(mysqli_real_escape_string($conn, $_POST['strtdate']))));
 				$breakdown->bind_param("isss", $loan_id, $deadline, $brkamnt, $inte);
 				$breakdown->execute();
 			}
-			savelogs("Add new loan", 'LoanID -> ' . $loan_id . ", Principal Amount -> " . number_format($_POST['amount'],2) . ', Interest -> ' . number_format(($_POST['amount'] * $gerate['rate'])/$_POST['duration'],2) . ', Rate -> ' . $gerate['rate'] . ' Start Date -> ' . $_POST['strtdate'] . ', CustomerID -> ' . $cust_id);
-			echo '<script type = "text/javascript">alert("Adding Record Successful");window.location.replace("loan/list");</script>';
+			savelogs("Add new loan", 'LoanID -> ' . $loan_id . ", Principal ID -> " . $_POST['principalid'] . " Principal Amount -> " . number_format($_POST['amount'],2) . ', Interest -> ' . number_format(($_POST['amount'] * $gerate['rate'])/$_POST['duration'],2) . ', Rate -> ' . $gerate['rate'] . ' Start Date -> ' . $_POST['strtdate'] . ', CustomerID -> ' . $cust_id);
+			echo '
+				<script type = "text/javascript">
+					var r = confirm("Adding Record Successful, do you wan\'t to print?");
+				    if (r == true) {
+				    	window.location.replace("loan/print/'.$loan_id.'&print");
+				    } else {
+				    	window.location.replace("loan/list");
+				    }					
+				</script>';
 		}
 	}
 	

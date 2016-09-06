@@ -15,8 +15,8 @@
 ?>
 <?php
   if(isset($_POST['submitrate'])){
-    $rate = $conn->prepare("UPDATE rate set daily = ?,weekly = ?,monthly = ?");
-    $rate->bind_param("sss", $_POST['dailyrate'], $_POST['weeklyrate'], $_POST['monthlyrate']);
+    $rate = $conn->prepare("UPDATE rate set daily = ?,weekly = ?,monthly = ?, penalty = ?");
+    $rate->bind_param("ssss", $_POST['dailyrate'], $_POST['weeklyrate'], $_POST['monthlyrate'], $_POST['penaltyrate']);
     if($rate->execute()){
       echo '<script type = "text/javascript">alert("Rates Updated");window.location.replace("/loan/'.$_GET['module'].'");</script>';
       savelogs('Change Rate', 'Daily ->' . $_POST['dailyrate'] . ', Weekly -> ' . $_POST['weeklyrate'] . ', Monthly -> ' . $_POST['monthlyrate']);
@@ -25,6 +25,7 @@
   $gerate = "SELECT * FROM rate";
   $gerate = $conn->query($gerate)->fetch_assoc();
 ?>
+<?php if($access->level > 1){ ?>
 <!-- caModal -->
   <div class="modal fade" id="interest" role="dialog">
     <div class="modal-dialog">    
@@ -50,7 +51,7 @@
             </div>
             <div class="form-group">
               <label for="usrname"> Penalty per day (in decimal) </label>
-              <input type = "text" <?php echo ' value = "' . $gerate['penalty'] . '" ';?> class="form-control input-sm" placeholder = "Enter Monthly Interest Rate" name = "monthlyrate" pattern = "[.0-9]*" required>
+              <input type = "text" <?php echo ' value = "' . $gerate['penalty'] . '" ';?> class="form-control input-sm" placeholder = "Enter Monthly Interest Rate" name = "penaltyrate" pattern = "[.0-9]*" required>
             </div>
             <button type="submit" name = "submitrate" class="btn btn-success btn-block">Update</button>
           </form>
@@ -58,6 +59,38 @@
       </div>      
     </div>
   </div>
+  <!-- caModal -->
+  <div class="modal fade" id="addprinci" role="dialog">
+    <div class="modal-dialog">    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header" style="padding:25px 50px;">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4><span class = "icon-coin-dollar"></span> Principal Amount</h4>
+        </div>
+        <div class="modal-body" style="padding:20px 50px;">
+          <form role="form" action = "" method = "post">
+            <div class="form-group">
+              <label for="usrname"> Principal Amount <font color="red">*</font></label>
+              <input type = "text" class="form-control input-sm" placeholder = "Enter Amount" name = "principal" pattern = "[.0-9]*" required>
+            </div>
+            <button type="submit" name = "submitprin" class="btn btn-success btn-block">Submit</button>
+          </form>
+        </div>
+      </div>      
+    </div>
+  </div>
+<?php
+  if(isset($_POST['submitprin'])){
+    $rate = $conn->prepare("INSERT INTO principal (principal_amount) VALUES (?)");
+    $rate->bind_param("s", $_POST['principal']);
+    if($rate->execute()){
+      echo '<script type = "text/javascript">alert("Adding Principal Successfull");window.location.replace("/loan/'.$_GET['module'].'");</script>';
+      savelogs('Add Principal Rate', 'Principal Amount -> ' . $_POST['principal']);
+    }
+  }
+?>
+<?php } ?>
   <div class="modal fade" id="changepass" role="dialog">
     <div class="modal-dialog">    
       <!-- Modal content-->

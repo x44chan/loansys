@@ -54,7 +54,8 @@
 							echo '<td>' . $row['duration'] . ' - ' . $row['type'] . '</td>';
 							echo 
 								'<td>
-									<a href = "loan/view/'.$row['loan_id'].'" class = "btn btn-sm btn-primary" data-toggle="tooltip" title="View"><span class = "icon-search"></span></a>';
+									<a href = "loan/view/'.$row['loan_id'].'" class = "btn btn-sm btn-primary" data-toggle="tooltip" title="View"><span class = "icon-search"></span></a>
+									<a onclick = "payment('.$row['loan_id'].');" class = "btn btn-sm btn-success" data-toggle="tooltip" title="Payment"><span>₱</span></a>';
 								if($access->level >= 2){
 									echo ' <a href = "loan/edit/'.$row['loan_id'].'" class = "btn btn-sm btn-warning" data-toggle="tooltip" title="Edit"><span class = "icon-quill"></span></a>';
 									echo ' <a href = "loan/delete/'.$row['loan_id'].'" class = "btn btn-sm btn-danger" data-toggle="tooltip" title="Delete"><span class = "icon-bin"></span></a>';
@@ -69,6 +70,18 @@
 			</tbody>
 		</table>
 	</div>
+	<div class="modal fade" id="payment" role="dialog"></div>
+	<?php
+		if(isset($_POST['paysub'])){
+			$breakdown_id = mysqli_real_escape_string($conn, $_POST['loan_id']);
+			$payment = $conn->prepare("INSERT INTO payment (loan_id, payprincipal, payinterest, paypenalty, paydate) VALUES (?, ?, ?, ?, now())");
+			$payment->bind_param("isss", $_POST['loan_id'], $_POST['prin'], $_POST['inte'], $_POST['penal']);
+			if($payment->execute() == TRUE){
+				savelogs("Add payment", "Payment for Loan ID: " . $_POST['loan_id'] . ' , Principal -> ₱ ' . number_format($_POST['prin'],2) . ' , Interest -> ₱ ' . number_format($_POST['inte'],2) . ' , Penalty -> ₱ ' . number_format($_POST['penal'],2));
+				echo '<script type = "text/javascript">alert("Payment Successful");window.location.replace("loan/list");</script>';
+			}
+		}
+	?>
 	<div class="row" style="margin-top: 10px;">
 		<div class="col-xs-12" align="center">
 			<!--<label>Records <?php $startArticlex = $startArticle + 1; $perpagex = $perpage * $_GET['view']; if($perpagex > $counter2['total']){ $perpagex = $counter2['total'];} echo $startArticlex . ' - ' . $perpagex ?> </label><br>-->

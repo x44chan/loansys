@@ -56,15 +56,32 @@
 ?>
 <?php
 	if(isset($_GET['payment'])){
+		$gerate = "SELECT * FROM rate";
+  		$gerate = $conn->query($gerate)->fetch_assoc();
 ?>
 	<div class="modal-dialog">    
     	<!-- Modal content-->
     	<div class="modal-content">
 	        <div class="modal-header" style="padding:35px 50px;">
 	        	<button type="button" class="close" data-dismiss="modal">&times;</button>
-	        	<h4><span class = "icon-coin-dollar"></span>Payment</h4>
+	        	<h4><span class = "icon-coin-dollar"></span> Payment</h4>
 	        </div>
 	        <div class="modal-body" style="padding:40px 50px;">
+	        	<?php
+	        		$loan_id = mysqli_real_escape_string($conn, $_GET['payment']);
+	        		$payment = "SELECT *,sum(payprincipal) as sumpayprincipal, sum(payinterest) as sumpayinterest, sum(paypenalty) as sumpaypenalty FROM loan as a, payment as b where a.loan_id = '$loan_id' and b.loan_id = '$loan_id'";
+	        		$payment = $conn->query($payment)->fetch_object();
+	        		echo '<div class = "form-group"><label>Principal Balance: ₱ ' . number_format($payment->principal - $payment->sumpayprincipal,2) . ' </label></div>';
+	        		echo '<hr>';
+	        		echo '<div class = "form-group"><label>Interest Balance (* '. $payment->rate .' ): ₱ ' . number_format(($payment->principal * $payment->rate) - $payment->sumpayinterest,2) . ' </label></div>';
+	        		echo '<hr>';
+	        		$diff=date_diff(date_create($payment->due),date_create(date("Y-m-d")));
+					if($diff->format("%R%") == '+' && $diff->format("%a%") > 0 && $payment->due <= date('Y-m-d') && $payment->state == 0){
+						$penalty = number_format(($payment->principal + ($payment->principal * $payment->rate)) * $gerate['penalty'],2);
+						echo '<div class = "form-group"><label>Penalty Balance (* '. $gerate['penalty'] .' ): ₱ '. $penalty . ' </label></div>';
+	        			echo '<hr>';
+					}
+	        	?>
 	        	<form role="form" action = "" method = "post">
 	        		<div class="form-group">
 	            		<label>Principal </label>
@@ -78,9 +95,8 @@
 	            		<label>Penalty </label>
 	            		<input value = '0' type = "text" name = "penal" class="form-control input-sm" placeholder = "Enter amount" pattern = "[.0-9]*">
 	            	</div>
-	            	<input type = "hidden" name = "breakdown_id" value = "<?php echo $_GET['payment'];?>">
-	            	<input type = "hidden" name = "forexec" value = "<?php echo number_format($_GET['exec'],2);?>">
-	            	<button type="submit" name = "paysub" class="btn btn-success btn-block"><span class ="icon-checkmark"></span> Add payment</button>
+	            	<button type="submit" name = "paysub" class="btn btn-success btn-block" onclick="return confirm('Are you sure?');"><span class ="icon-checkmark"></span> Add payment</button>
+	            	<input type = "hidden" value = "<?php echo $loan_id;?>" name = "loan_id"/>
 	          	</form>
 	    	</div>
     	</div>
@@ -148,8 +164,8 @@ if(isset($_GET['amount']) && isset($_GET['type']) && isset($_GET['duration']) &&
 		<i><p style="margin-left: 20px;">₱ <?php echo number_format(($amount * $gerate['rate']) + $amount,2);?></p></i>
 	</div>
 	<div class="col-md-2 col-xs-6" style="border-right: 1px solid #eee;">
-		<label><u>Start Date </u></label>
-		<i><p style="margin-left: 20px;"><?php echo date("M j, Y", strtotime($strdate));?></p></i>
+		<label><u>Due Date </u></label>
+		<i><p style="margin-left: 20px;"><?php echo date("M j, Y", strtotime("+".$duration.' '. $type, strtotime($strdate)));?></p></i>
 	</div>
 </div>
 <?php if($duration > 0){ ?>

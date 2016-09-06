@@ -16,7 +16,7 @@
         	    <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="icon-coin-dollar"></span> Loan <b class="caret"></b></a>
                     <ul class="dropdown-menu" role="menu">
-                        <?php if($access->level >= 0){ ?> <li><a role = "button" href = "loan"><span class="icon-plus"></span> New Loan Application </a></li> <?php } ?>
+                        <li><a role = "button" href = "loan"><span class="icon-plus"></span> New Loan Application </a></li>
                         <li><a role = "button" href = "loan/list"><span class="icon-list"></span> Loan List </a></li>
                         <li><a role = "button" href = "loan/due"><span class="icon-list"></span> Due List </a></li>
                     </ul>
@@ -33,7 +33,8 @@
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <span class="icon-cogs"></span> System Management <b class="caret"></b></a>
                     <ul class="dropdown-menu" role="menu">
                         <li><a href="#"  data-toggle="modal" data-target="#interest"> <span class = "icon-calculator"></span> Interest Rate</a></li>
-                        <li><a role = "button" href = "audit"><span class="icon-clipboard"></span> Audit Log </a></li>
+                        <li><a href="#"  data-toggle="modal" data-target="#addprinci"> <span class = "icon-stack"></span> Add Principal</a></li>
+                        <li><a role = "button" href = "sys/audit"><span class="icon-clipboard"></span> Audit Log </a></li>
                     </ul>
                 </li> 
                 <?php } ?>

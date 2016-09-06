@@ -62,7 +62,7 @@
 					<?php echo $row['transaction']; ?>
 				</div>
 				<div class="col-xs-2">
-					<?php echo date("M j, Y h:i:s", strtotime($row['datetrans'])); ?>
+					<?php echo date("M j, Y h:i:s A", strtotime($row['datetrans'])); ?>
 				</div>
 				<div class="col-xs-5">
 					<?php echo $row['transdetail']; ?>

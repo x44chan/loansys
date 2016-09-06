@@ -1,5 +1,6 @@
 <?php
-	if(!isset($_GET['paid'])){
+	// Old Payment System
+	/*if(!isset($_GET['paid'])){
 		$_GET['paid'] = "";
 	}
 	if($_GET['paid'] > 0 && $_GET['id'] > 0){
@@ -18,9 +19,9 @@
 		}else{
 			echo '<script type="text/javascript">alert("Payment failed"); window.close();</script>';
 		}
-	}
+	}*/
 ?>
-<div class="container">
+<!--<div class="container">
 	<div class="row">
 		<div class="col-xs-12">
 			<i><h4  style="margin-left: -40px;"><span class="icon-coin-dollar"></span><u> Payment </u></h4></i>
@@ -54,3 +55,4 @@
 		</div>
 	</form>
 </div>
+-->

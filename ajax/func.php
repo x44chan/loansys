@@ -41,8 +41,8 @@
 	    xmlhttp.open("GET","ajax/ajaxowner.php?loanlist="+str,true);
 	    xmlhttp.send();		
 	}
-	function payment(str,exec) {
-		if (str == "" || exec == "") {
+	function payment(str) {
+		if (str == "") {
 		    document.getElementById("payment").innerHTML = "";
 		    return;
 		} else { 
@@ -58,7 +58,7 @@
 		            document.getElementById("payment").innerHTML = xmlhttp.responseText;
 		        }
 		    };
-		    xmlhttp.open("GET","ajax/ajaxowner.php?payment="+str+"&exec="+exec,true);
+		    xmlhttp.open("GET","ajax/ajaxowner.php?payment="+str,true);
 		    xmlhttp.send();
 		    $("#payment").modal();
 		}
