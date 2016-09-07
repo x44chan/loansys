@@ -102,19 +102,35 @@
         <div class="modal-body" style="padding:40px 50px;">
           <form role="form" action = "" method = "post">
             <div class="form-group">
-              <label for="usrname"><span class="glyphicon glyphicon-eye-open"></span> Password</label>
+              <label for="usrname"><span class="icon-eye"></span> Password</label>
               <input type="password" class="form-control" required id="psw" name = "pword" autocomplete="off"placeholder="Enter password">
             </div>
             <div class="form-group">
-              <label for="psw"><span class="glyphicon glyphicon-eye-open"></span> Confirm Password</label>
+              <label for="psw"><span class="icon-eye"></span> Confirm Password</label>
               <input type="password" class="form-control" required id="psw1" name = "pword2" autocomplete="off"placeholder="Enter password">
             </div>
-              <button type="submit" id = "submitss" name = "submitpw" class="btn btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Update</button>
+              <button type="submit" id = "submitss" name = "submitpw" class="btn btn-success btn-block"><span class="icon-switch"></span> Update</button>
           </form>
         </div>
       </div>
     </div>
   </div>
+<?php
+  if(isset($_POST['submitpw'])){
+    $pword = mysqli_real_escape_string($conn, $_POST['pword']);
+    $pword2 = mysqli_real_escape_string($conn, $_POST['pword2']);
+    $password = $_SESSION['pass'];
+    $acc_id = $_SESSION['acc_id'];
+    $sql ="UPDATE user set pword = '$pword' where account_id = '$acc_id'";
+    if ($conn->query($sql) === TRUE) {
+        $_SESSION['pass'] = null;
+        echo '<script type = "text/javascript">alert("update successful"); window.location.replace("'.$_GET['module'].'");</script>';
+    } else {
+        echo "Error updating record: " . $conn->error;
+    }  
+}
+
+?>
     <div id="loader"></div>
     <!-- Page Content -->
     <div class = "container-fluid animate-bottom" id = "tohide" <?php if(!isset($_GET['print'])){ echo ' style="margin-top: 60px; display: none;"'; }else{ echo ' style = "visibility: hidden" '; }?>>
@@ -148,7 +164,7 @@
 	.table {border-bottom:0px !important;}
 	.table th, .table td {border: 0px !important;}
 </style>
-		<h3 align="center"><i><span class="icon-lock"></span><i class="fa fa-desktop"></i> Login Form</i></h3>
+		<h3 align="center"><i><span class="icon-lock"></span><i class="fa fa-desktop"></i> Loan Login Form</i></h3>
 		<form role = "form" action = "" method = "post" id = "tohide" style="display: none;">	
 			<table align = "center" class = "table form-horizontal" style = "margin-top: 0px; width: 800px;" >
 				<tr>

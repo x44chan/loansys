@@ -83,7 +83,7 @@
 			<label> Pages </label><br>
 			<?php
 				$prev = intval($_GET['page'])-1;					
-				if($prev > 0){ echo '<a data-toggle="tooltip" title="Previous" class = "btn btn-default btn-sm" style = "margin: 5px;" href="?audit&page=' . $prev . '"> < </a>'; }
+				if($prev > 0){ echo '<a data-toggle="tooltip" title="Previous" class = "btn btn-default btn-sm" style = "margin: 5px;" href="sys/audit&page=' . $prev . '"> < </a>'; }
 				foreach(range(1, $totalPages) as $page){
 				    if($page == $_GET['page']){
 				        echo '<b><span class="currentpage" style = "margin: 5px;">' . $page . '</span></b>';
@@ -91,11 +91,11 @@
 				    	if($page == 0){
 				    		continue;
 				    	}
-				        echo '<a class = "btn btn-default btn-sm" data-toggle="tooltip" title="Page ' . $page . '" style = "margin: 5px;" href="?audit&page=' . $page . '">' . $page . '</a>';
+				        echo '<a class = "btn btn-default btn-sm" data-toggle="tooltip" title="Page ' . $page . '" style = "margin: 5px;" href="sys/audit&page=' . $page . '">' . $page . '</a>';
 				    }
 				}
 				$nxt = intval($_GET['page'])+1;
-				if($nxt <= $totalPages){ echo '<a class = "btn btn-default btn-sm" data-toggle="tooltip" title="Next" style = "margin: 5px;" href="?audit&page=' . $nxt . '"> > </a>'; }
+				if($nxt <= $totalPages){ echo '<a class = "btn btn-default btn-sm" data-toggle="tooltip" title="Next" style = "margin: 5px;" href="sys/audit&page=' . $nxt . '"> > </a>'; }
 				
 			?>
 		</div>

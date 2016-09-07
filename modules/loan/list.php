@@ -73,12 +73,44 @@
 	<div class="modal fade" id="payment" role="dialog"></div>
 	<?php
 		if(isset($_POST['paysub'])){
-			$breakdown_id = mysqli_real_escape_string($conn, $_POST['loan_id']);
-			$payment = $conn->prepare("INSERT INTO payment (loan_id, payprincipal, payinterest, paypenalty, paydate) VALUES (?, ?, ?, ?, now())");
-			$payment->bind_param("isss", $_POST['loan_id'], $_POST['prin'], $_POST['inte'], $_POST['penal']);
-			if($payment->execute() == TRUE){
-				savelogs("Add payment", "Payment for Loan ID: " . $_POST['loan_id'] . ' , Principal -> ₱ ' . number_format($_POST['prin'],2) . ' , Interest -> ₱ ' . number_format($_POST['inte'],2) . ' , Penalty -> ₱ ' . number_format($_POST['penal'],2));
-				echo '<script type = "text/javascript">alert("Payment Successful");window.location.replace("loan/list");</script>';
+		    $loan_id = mysqli_real_escape_string($conn, $_POST['loan_id']);
+    		$payment = "SELECT *,sum(payprincipal) as sumpayprincipal, sum(payinterest) as sumpayinterest, sum(paypenalty) as sumpaypenalty FROM loan as a, payment as b where a.loan_id = '$loan_id' and b.loan_id = '$loan_id'";
+    		$payment = $conn->query($payment)->fetch_object();
+    		$totprinc = $payment->principal - $payment->sumpayprincipal;
+    		$totinte = ($payment->principal * $payment->rate) - $payment->sumpayinterest;
+    		$diff=date_diff(date_create($payment->due),date_create(date("Y-m-d")));
+			if($diff->format("%R%") == '+' && $diff->format("%a%") > 0 && $payment->due <= date('Y-m-d') && $payment->state == 0){
+				$penalty = (($payment->principal + ($payment->principal * $payment->rate)) * $gerate['penalty']) * $diff->format("%a%");
+			}
+			$err = "";
+			if($totprinc < $_POST['prin']){
+				$err = $err . ' principal ';
+			}
+			if($totinte < $_POST['inte']){
+				if($err != ""){
+					$err = $err . ', interest ';
+				}else{
+					$err = $err . ' interest ';
+				}
+			}
+			if($penalty < $_POST['penal']){
+				if($err != ""){
+					$err = $err . ', penalty ';
+				}else{
+					$err = $err . ' penalty ';
+				}
+			}
+			if($err == ""){
+				$payment = $conn->prepare("INSERT INTO payment (loan_id, payprincipal, payinterest, paypenalty, paydate) VALUES (?, ?, ?, ?, now())");
+				$payment->bind_param("isss", $_POST['loan_id'], $_POST['prin'], $_POST['inte'], $_POST['penal']);
+				if($payment->execute() == TRUE){
+					savelogs("Add payment", "Payment for Loan ID: " . $_POST['loan_id'] . ' , Principal -> ₱ ' . number_format($_POST['prin'],2) . ' , Interest -> ₱ ' . number_format($_POST['inte'],2) . ' , Penalty -> ₱ ' . number_format($_POST['penal'],2));
+					echo '<script type = "text/javascript">alert("Payment Successful");window.location.replace("loan/list");</script>';
+				}
+			}else{
+				savelogs("Payment Error", "Principal Balance: ₱ " . number_format($totprinc,2) . ' -> Inputed Principal Amount: ₱ ' . number_format($_POST['prin'],2) . ', Interest Balance: ₱ ' . number_format($totinte,2) . ' -> Inputed Interest Amount: ₱ ' . number_format($_POST['inte'],2) . ', Penalty Balance: ₱ ' . number_format($penalty,2) . ' -> Inputed Penalty Amount: ₱ ' . number_format($_POST['penal'],2));
+				echo '<script type = "text/javascript">alert("Payment Error check your inputed '.$err.'amount/s.");window.location.replace("loan/list");</script>';
+				
 			}
 		}
 	?>

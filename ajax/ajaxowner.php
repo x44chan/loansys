@@ -77,8 +77,8 @@
 	        		echo '<hr>';
 	        		$diff=date_diff(date_create($payment->due),date_create(date("Y-m-d")));
 					if($diff->format("%R%") == '+' && $diff->format("%a%") > 0 && $payment->due <= date('Y-m-d') && $payment->state == 0){
-						$penalty = number_format(($payment->principal + ($payment->principal * $payment->rate)) * $gerate['penalty'],2);
-						echo '<div class = "form-group"><label>Penalty Balance (* '. $gerate['penalty'] .' ): ₱ '. $penalty . ' </label></div>';
+						$penalty = number_format((($payment->principal + ($payment->principal * $payment->rate)) * $gerate['penalty']) * $diff->format("%a%"),2);
+						echo '<div class = "form-group"><label>Penalty Balance (* '. $gerate['penalty'] .' ): ₱ '. $penalty . ' <font color = "red">( '. $diff->format("%a%") . ' day/s) </font> </label></div>';
 	        			echo '<hr>';
 					}
 	        	?>
