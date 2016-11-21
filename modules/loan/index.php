@@ -59,6 +59,16 @@
 					<label><input type = "checkbox" name = "checkbox" id = "checkbox"/> Add new client </label>
 				</div>
 			</div>
+			<div class="row" style="margin-left: 20px;">
+				<div class="col-md-6 col-xs-12">
+					<label>Reason <font color = "red"> * </font></label>
+					<textarea class="form-control input-sm" name = "reason" placeholder = "Enter reason" required></textarea>
+				</div>
+				<div class="col-md-6 col-xs-12">
+					<label>Co - Maker <font color="red"> * </font></label>
+					<input type = "text" name = "comaker" class="form-control input-sm" style = "text-transform: uppercase;" placeholder = "Enter co-maker name">
+				</div>
+			</div>
 			<div class="row">
 				<div class="col-xs-12">
 					<hr>
@@ -66,7 +76,7 @@
 				</div>
 			</div>
 			<div class="row" style="margin-left: 20px;">
-				<div class="col-md-3 col-xs-12">
+				<div class="col-md-4 col-xs-12">
 					<label>Principal ID<font color = "red"> *</font></label>
 					<select class="form-control input-sm" name = "principalid" required>
 						<option value=""> - - - - - - </option>
@@ -75,7 +85,12 @@
 							$principal = $conn->query($principal);
 							if($principal->num_rows > 0){
 								while ($row = $principal->fetch_object()) {
-									echo '<option value = "' . $row->principal_id . '"> ' . number_format($row->principal_amount,2) . ' </option>';
+									$main = "SELECT *,sum(b.principal) as total_loan,sum(b.principal * b.rate) as total_interes  FROM principal as a, loan as b where a.principal_id = '$row->principal_id' and b.principal_id = '$row->principal_id' ORDER BY a.principal_date DESC";
+									$main = $conn->query($main)->fetch_object();
+									if($main->principal_amount - $main->total_loan <= 0){
+										continue;
+									}
+									echo '<option value = "' . $row->principal_id . '"> ' . number_format($row->principal_amount,2) . ' ( Bal: '. number_format($main->principal_amount - $main->total_loan,2). ' ) </option>';
 								}
 							}
 						?>
@@ -123,6 +138,29 @@
 </div>
 <?php
 	if(isset($_POST['loansub'])){
+		$trxn = 'EEN-'.random_string(8);
+		$trnx = "SELECT * FROM loan where trxn = '$trxn'";
+		$trxre = $conn->query($trnx);
+		if($trxre->num_rows > 0){
+			$i = 0;
+			while ( $i < 1) {
+				$trnxx = "SELECT * FROM loan where trxn = '$trxn'";
+				$trxrex = $conn->query($trnxx);
+				if($trxrex->num_rows > 0){
+					$i = 1;
+					$trxn = 'EEN-'.random_string(8);
+				}else{
+					$i = 0;
+				}
+			}
+		}
+		$principalid = mysqli_real_escape_string($conn, $_POST['principalid']);
+		$main = "SELECT *,sum(b.principal) as total_loan,sum(b.principal * b.rate) as total_interes  FROM principal as a, loan as b where a.principal_id = '$principalid' and b.principal_id = '$principalid' ORDER BY a.principal_date DESC";
+		$main = $conn->query($main)->fetch_object();
+		if( ($main->principal_amount - $main->total_loan) < $_POST['amount'] ){
+			echo '<script type = "text/javascript">alert("Not enough balance for the Principal ID.");window.location.replace("loan");</script>';
+			exit;
+		}
 		if(!isset($_POST['customer'])){
 			$cust = $conn->prepare("INSERT INTO customer (fname,mname,lname,address,contact) VALUES (?, ?, ?, ?, ?)");
 			$cust->bind_param("ssssi", $_POST['fname'], $_POST['mname'], $_POST['lname'], $_POST['address'], $_POST['contact']);
@@ -146,9 +184,10 @@
 		}else{
 			$type = 'Month';
 		}
+
 		$due = date("Y-m-d", strtotime("+".$_POST['duration'].' '. $type, strtotime($_POST['strtdate'])));
-		$loan = $conn->prepare("INSERT INTO loan (customer_id, principal_id, principal, duration, type, startdate, rate, specialrate, due) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-		$loan->bind_param("iisssssis", $cust_id, $_POST['principalid'], $_POST['amount'], $_POST['duration'], $_POST['type'], $_POST['strtdate'], $gerate['rate'], $sprate, $due);
+		$loan = $conn->prepare("INSERT INTO loan (trxn,customer_id, principal_id, principal, duration, type, startdate, rate, specialrate, due, reason, comaker) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+		$loan->bind_param("siisssssisss", $trxn, $cust_id, $_POST['principalid'], $_POST['amount'], $_POST['duration'], $_POST['type'], $_POST['strtdate'], $gerate['rate'], $sprate, $due, $_POST['reason'], $_POST['comaker']);
 		if($loan->execute() == TRUE){
 			$loan_id = $conn->insert_id;
 			$total = 0;
@@ -164,9 +203,10 @@
 					$brkamnt += number_format($_POST['amount'] - $total,2);
 					$inte += number_format(($_POST['amount'] * $gerate['rate']) - $totalinte,2);
 				}
+				$inter = $_POST['amount'] * $gerate['rate'];
 				$breakdown = $conn->prepare("INSERT INTO breakdown (loan_id, deadline, amount, interest) VALUES (?, ?, ?, ?)");
 				$deadline = date("Y-m-d", strtotime("+".$i.' '. $type, strtotime(mysqli_real_escape_string($conn, $_POST['strtdate']))));
-				$breakdown->bind_param("isss", $loan_id, $deadline, $brkamnt, $inte);
+				$breakdown->bind_param("isss", $loan_id, $deadline, $_POST['amount'], $inter);
 				$breakdown->execute();
 			}
 			savelogs("Add new loan", 'LoanID -> ' . $loan_id . ", Principal ID -> " . $_POST['principalid'] . " Principal Amount -> " . number_format($_POST['amount'],2) . ', Interest -> ' . number_format(($_POST['amount'] * $gerate['rate'])/$_POST['duration'],2) . ', Rate -> ' . $gerate['rate'] . ' Start Date -> ' . $_POST['strtdate'] . ', CustomerID -> ' . $cust_id);

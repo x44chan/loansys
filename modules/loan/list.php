@@ -14,8 +14,10 @@
 					<th>#</th>
 					<th>Name</th>
 					<th>Loan Amount</th>
-					<th>Interest</th>
+					<th>Monthly Interest</th>
+					<th>Total Interest</th>
 					<th>Total</th>
+					<th>Start Date</th>
 					<th>Duration / Type</th>
 					<th>Action</th>
 				</tr>
@@ -37,32 +39,43 @@
 					    $_GET['view'] = $totalPages;
 					}
 					$startArticle = ($_GET['view'] - 1) * $perpage;
-					$list = "SELECT * FROM customer as a,loan as b,breakdown as c where a.customer_id = b.customer_id and b.loan_id = c.loan_id and c.state = '0' group by b.loan_id LIMIT " . $startArticle . ', ' . $perpage;
+					$list = "SELECT * FROM customer as a,loan as b,breakdown as c where a.customer_id = b.customer_id and b.loan_id = c.loan_id and c.state = '0' group by b.loan_id ORDER BY b.startdate ASC LIMIT " . $startArticle . ', ' . $perpage;
 					$res = $conn->query($list);
+					$totalloan = 0; $totalinterest = 0; $total = 0; $moninte = 0;
 					if($res->num_rows > 0){
 						$num = 0;
 						while ($row = $res->fetch_assoc()) {
 							$gerate = "SELECT ".strtolower($row['type']) ." as rate FROM rate";
 							$gerate = $conn->query($gerate)->fetch_assoc();
 							$num += 1;	
+							$totalloan += $row['principal'];
+							$totalinterest += ($row['principal'] * $row['rate']) * $row['duration'];
+							$moninte += ($row['principal'] * $row['rate']);
+							$total += ( (($row['principal'] * $row['rate']) * $row['duration']) +  $row['principal'] );
 							echo '<tr>';
 							echo '<td>' . $num . '</td>';
 							echo '<td>' . $row['fname'] . ' ' . $row['mname'] . ' ' . $row['lname'] . ' ( ' . $row['customer_id'] . ' )</td>';
 							echo '<td>₱ ' . number_format($row['principal'],2) . '</td>';
-							echo '<td>₱ ' . number_format($row['principal'] * $row['rate'],2) . '</td>';
-							echo '<td>₱ ' . number_format(str_replace(",", "", number_format($row['principal'] * $row['rate'],2)) + str_replace(",", "", number_format($row['principal'],2)),2) . '</td>';
+							echo '<td>₱ ' . number_format( ($row['principal'] * $row['rate']), 2) . '</td>';
+							echo '<td>₱ ' . number_format( ($row['principal'] * $row['rate']) * $row['duration'], 2) . '</td>';
+							echo '<td>₱ ' . number_format(str_replace(",", "", number_format(($row['principal'] * $row['rate']) * $row['duration'],2)) + str_replace(",", "", number_format($row['principal'],2)),2) . '</td>';
+							echo '<td>' . date("M j, Y", strtotime($row['startdate'])) . '</td>';
 							echo '<td>' . $row['duration'] . ' - ' . $row['type'] . '</td>';
 							echo 
 								'<td>
 									<a href = "loan/view/'.$row['loan_id'].'" class = "btn btn-sm btn-primary" data-toggle="tooltip" title="View"><span class = "icon-search"></span></a>
 									<a onclick = "payment('.$row['loan_id'].');" class = "btn btn-sm btn-success" data-toggle="tooltip" title="Payment"><span>₱</span></a>';
-								if($access->level >= 2){
-									echo ' <a href = "loan/edit/'.$row['loan_id'].'" class = "btn btn-sm btn-warning" data-toggle="tooltip" title="Edit"><span class = "icon-quill"></span></a>';
-									echo ' <a href = "loan/delete/'.$row['loan_id'].'" class = "btn btn-sm btn-danger" data-toggle="tooltip" title="Delete"><span class = "icon-bin"></span></a>';
-								}
 							echo '</td>';
 							echo '</tr>';
 						}
+						echo '<tr>';
+							echo '<td></td><td align = "right"> <b>Total:</b></td>';
+							echo '<td>₱ ' . number_format($totalloan,2) . '</td>';
+							echo '<td>₱ ' . number_format($moninte,2) . '</td>';
+							echo '<td>₱ ' . number_format($totalinterest,2) . '</td>';
+							echo '<td>₱ ' . number_format($total,2) . '</td>';
+							echo '<td></td><td></td><td></td>';
+						echo '</tr>';
 					}else{
 						echo '<tr><td colspan = "6" align = "center"> <h5> No Record Found </h5></td></tr>';
 					}
@@ -79,8 +92,12 @@
     		$totprinc = $payment->principal - $payment->sumpayprincipal;
     		$totinte = ($payment->principal * $payment->rate) - $payment->sumpayinterest;
     		$diff=date_diff(date_create($payment->due),date_create(date("Y-m-d")));
-			if($diff->format("%R%") == '+' && $diff->format("%a%") > 0 && $payment->due <= date('Y-m-d') && $payment->state == 0){
+    		$gerate = "SELECT * FROM rate";
+  			$gerate = $conn->query($gerate)->fetch_assoc();
+			if($diff->format("%R%") == '+' && $diff->format("%a%") > 0 && $payment->due <= date('Y-m-d')){
 				$penalty = (($payment->principal + ($payment->principal * $payment->rate)) * $gerate['penalty']) * $diff->format("%a%");
+			}else{
+				$penalty = 0;
 			}
 			$err = "";
 			if($totprinc < $_POST['prin']){
@@ -108,8 +125,8 @@
 					echo '<script type = "text/javascript">alert("Payment Successful");window.location.replace("loan/list");</script>';
 				}
 			}else{
-				savelogs("Payment Error", "Principal Balance: ₱ " . number_format($totprinc,2) . ' -> Inputed Principal Amount: ₱ ' . number_format($_POST['prin'],2) . ', Interest Balance: ₱ ' . number_format($totinte,2) . ' -> Inputed Interest Amount: ₱ ' . number_format($_POST['inte'],2) . ', Penalty Balance: ₱ ' . number_format($penalty,2) . ' -> Inputed Penalty Amount: ₱ ' . number_format($_POST['penal'],2));
-				echo '<script type = "text/javascript">alert("Payment Error check your inputed '.$err.'amount/s.");window.location.replace("loan/list");</script>';
+				//savelogs("Payment Error", "Principal Balance: ₱ " . number_format($totprinc,2) . ' -> Inputed Principal Amount: ₱ ' . number_format($_POST['prin'],2) . ', Interest Balance: ₱ ' . number_format($totinte,2) . ' -> Inputed Interest Amount: ₱ ' . number_format($_POST['inte'],2) . ', Penalty Balance: ₱ ' . number_format($penalty,2) . ' -> Inputed Penalty Amount: ₱ ' . number_format($_POST['penal'],2));
+				//echo '<script type = "text/javascript">alert("Payment Error check your inputed '.$err.'amount/s.");window.location.replace("loan/list");</script>';
 				
 			}
 		}

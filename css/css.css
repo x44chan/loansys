@@ -166,11 +166,11 @@ html {
     visibility: hidden;
   }
   #reportg h4{
-    font-size: 15px;
+    font-size: 35px !important;
   }
   @page{
     margin-left: 5mm;
-    margin-right: 2mm;
+    margin-right: 7mm;
   }
   #reportg, #reportg * {
     visibility: visible;
@@ -178,20 +178,20 @@ html {
   label{
     font-size: 10px;
   } 
-  p{
-    font-size: 10px !important;
+  #reportg td p{
+    font-size: 12px !important;
   }
   #details{
     font-size: 8px;
   }
   #reportg th{
-    font-size: 10px;
+    font-size: 20px !important;
     width: 0;
   } 
   #reportg td{
-    font-size: 9px;
+    font-size: 17px !important;
     bottom: 0px;
-    padding: 3px  ₱ 1,000.00;
+    padding: 3px;
     max-width: 210px;
   }
   #reportg {

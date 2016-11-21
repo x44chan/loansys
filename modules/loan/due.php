@@ -39,8 +39,10 @@
 				$gerate = "SELECT * FROM rate";
 				$gerate = $conn->query($gerate)->fetch_assoc();
 				$counter = 0;
+				$lastcus = 0;
 				if($due->num_rows > 0){
 					while ($row = $due->fetch_object()) {
+
 						$counter += 1;
 						$xpayment = "SELECT sum(payprincipal) as principal, sum(payinterest) as interest, sum(paypenalty) as penalty FROM payment where loan_id = '$row->loan_id'";
 						$xpayment = $conn->query($xpayment)->fetch_object();					
@@ -54,22 +56,28 @@
 							$diff = "";
 							$duex = "";
 							$penalty = 0;
-						}
+						}						
 						$totalprin += $row->amount;
 						$totalint += $row->interest;
 						$totalpen += str_replace(",", "", $penalty);
 						$totaldue += $row->amount + $row->interest + str_replace(",", "", $penalty);
+						if(($row->amount + $row->interest + str_replace(",", "", $penalty)) - ($xpayment->principal + $xpayment->interest + $xpayment->penalty) == 0){
+							$counter -= 1;
+							continue;
+						}
 			?>
 				<tr <?php echo $duex;?>>
 					<td><?php echo $counter;?></td>
-					<td><?php echo $row->fname . ' ' . $row->mname . ' ' . $row->lname; ?></td>
-					<td>₱ <?php echo number_format($row->amount - $xpayment->principal,2); ?></td>
-					<td>₱ <?php echo number_format($row->interest - $xpayment->interest,2); ?></td>
+					<td><?php if($lastcus == $row->customer_id){ echo ' - '; }else{ echo $row->fname . ' ' . $row->mname . ' ' . $row->lname; } ?></td>
+					<td>₱ <?php echo number_format($row->principal - $xpayment->principal,2); ?></td>
+					<td>₱ <?php echo number_format(($row->principal * $row->rate) - $xpayment->interest,2); ?></td>
 					<td>₱ <?php echo number_format(str_replace(",", "", $penalty) - $xpayment->penalty,2); ?></td>
-					<td>₱ <?php echo number_format(($row->amount + $row->interest + str_replace(",", "", $penalty)) - ($xpayment->principal + $xpayment->interest + $xpayment->penalty),2); ?></td>
+					<td>₱ <?php echo number_format(($row->principal + ($row->principal * $row->rate) + str_replace(",", "", $penalty)) - ($xpayment->principal + $xpayment->interest + $xpayment->penalty),2); ?></td>
 					<td><?php echo date("M j, Y", strtotime($row->deadline)) . ' ' . $diff; ?></td>
 				</tr>
 			<?php	
+
+						$lastcus = $row->customer_id;
 					}
 			?>
 				<tr>

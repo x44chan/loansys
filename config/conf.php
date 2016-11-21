@@ -25,4 +25,16 @@
 	    $sqllogs = "insert into audit_trail(username,realname,transaction,datetrans,transdetail,pcname) values('$username','$realname','$transaction',now(),'$transdetails','$pcname')";            
 	    $result = mysqli_query($conn, $sqllogs);
 	}
+	function random_string($length) {
+	    $key = '';
+	    $keys = array_merge(range(0, 9));
+	    $keys2 = array_merge(range('A', 'Z'));
+	    for ($i = 0; $i < $length; $i++) {
+	        $key .= $keys[array_rand($keys)];
+	        if($i %3 == true){
+	       		$key .= $keys2[array_rand($keys2)];
+	        }
+	    }
+	    return $key;
+	}
 ?>
